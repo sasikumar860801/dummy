@@ -1,0 +1,103 @@
+table model_series
+
+id - int(11)
+sef_url - varchar(255)
+meta_title - varchar(255)
+meta_desc - varchar(255)
+meta_keywords - varchar(255)
+title - varchar(255)
+price - float
+device_img - varchar(255)
+device_icon - varchar(255)
+sub_title - text
+short_description - text
+description - text
+popular_device - tinyint(1)
+published - tinyint(1)
+ordering - int(11)
+box_size - varchar(25)
+models_show_in_footer - tinyint(1)
+meta_canonical_url - text
+custom_schema - text
+
+table model 
+
+id - int(11)
+long_id - varchar(255)
+sef_url - varchar(255)
+title - varchar(255)
+meta_title - varchar(255)
+meta_desc - varchar(255)
+meta_keywords - varchar(255)
+meta_canonical_url - text
+cat_id - int(11)
+model_series_id - int(11)
+brand_id - int(11)
+price - float
+least_price - float
+least_price_add_sub - char(1)
+least_price_type - tinyint(4)
+capacity - longtext
+sell_price - float
+model_img - varchar(255)
+warranty - varchar(10)
+tooltip_device - text
+top_seller - tinyint(1)
+type - varchar(25)
+published - tinyint(1)
+cstm_group_id - varchar(10)
+ordering - int(11)
+created_date - timestamp
+upto_price - float
+upto_price_add_sub - varchar(5)
+upto_price_type - tinyint(1)
+searchable_words - text
+description - longtext
+custom_schema - text
+updated_at - timestamp
+
+brand
+
+id - int(11)
+title - varchar(255)
+show_title - tinyint(1)
+sef_url - varchar(255)
+meta_title - text
+meta_desc - text
+meta_keywords - text
+image - varchar(255)
+description - text
+published - tinyint(1)
+ordering - int(11)
+meta_canonical_url - text
+custom_schema - text
+
+Route::get('/sell-old-phone/{slug}', [UserController::class, 'model'])->name('model.all');
+slug means brand.title 
+
+like that 
+http://127.0.0.1:8000/sell-old-phone/samsung
+
+so u just fetch the data 
+first take the slug in this url its samsung right 
+
+so check brand.title== samsung and get id so u got brand id
+
+so fetch model data where brand_id = $brand_id and cat_id=83 static
+
+so u got data right and compact send to view page / maintain same theme with hover with mobile responsive too and seo too
+
+view page 
+
+Search samsung model to sell text 
+below one text box search a model ( search ur samsnug model) / if u need write one more route api to fetch data 
+
+Choose by series
+default all button selected and model_series_id using this id u got title so list same inline if list is too long  then move to next line 
+like ALL , galaxy f series , galaxy m series ........
+if customer select m series only list m series only like filter thats all 
+
+choose model
+image below model.title 
+each linle total 5 model in laoptop view 
+

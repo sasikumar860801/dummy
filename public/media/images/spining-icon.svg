@@ -1,0 +1,85 @@
+<svg class="lds-spin" width="200px" height="200px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="shape-rendering: auto; animation-play-state: running; animation-delay: 0s; background: none;"><g transform="translate(85,50)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(0)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="1" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.06159 1.06159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.9166666666666666s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.9166666666666666s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>   
+</g>
+</g><g transform="translate(80.31088913245536,67.5)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(29.999999999999996)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.9166666666666666" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.08659 1.08659)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.8333333333333334s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.8333333333333334s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(67.5,80.31088913245534)" class="" style="animation-play-state: running; animation-delay: 0s;"> 
+<g transform="rotate(59.99999999999999)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.8333333333333334" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.11159 1.11159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.75s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.75s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(50,85)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(90)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.75" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.13659 1.13659)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.6666666666666666s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.6666666666666666s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(32.50000000000001,80.31088913245536)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(119.99999999999999)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.6666666666666666" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.16159 1.16159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.5833333333333334s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.5833333333333334s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(19.689110867544645,67.5)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(150.00000000000003)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.5833333333333334" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.18659 1.18659)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.5s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.5s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(15,50.00000000000001)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(180)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.5" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.21159 1.21159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.4166666666666667s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.4166666666666667s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(19.689110867544642,32.500000000000014)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(209.99999999999997)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.4166666666666667" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.23659 1.23659)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.3333333333333333s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.3333333333333333s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(32.499999999999986,19.689110867544652)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(239.99999999999997)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.3333333333333333" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.26159 1.26159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.25s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.25s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(49.99999999999999,15)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(270)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.25" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.28659 1.28659)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.16666666666666666s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.16666666666666666s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(67.5,19.68911086754465)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(300.00000000000006)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.16666666666666666" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.01159 1.01159)">
+  <animateTransform attributeName="transform" type="scale" begin="-0.08333333333333333s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="-0.08333333333333333s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</circle>
+</g>
+</g><g transform="translate(80.31088913245534,32.499999999999986)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<g transform="rotate(329.99999999999994)" class="" style="animation-play-state: running; animation-delay: 0s;">
+<circle cx="0" cy="0" r="6" fill="#000" fill-opacity="0.08333333333333333" class="" style="animation-play-state: running; animation-delay: 0s;" transform="scale(1.03659 1.03659)">
+  <animateTransform attributeName="transform" type="scale" begin="0s" values="1.3 1.3;1 1" keyTimes="0;1" dur="1s" repeatCount="indefinite" class="" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+  <animate attributeName="fill-opacity" keyTimes="0;1" dur="1s" repeatCount="indefinite" values="1;0" begin="0s" class="" style="animation-play-state: running; animation-delay: 0s;"></animate> 
+</circle>
+</g>
+</g></svg>
