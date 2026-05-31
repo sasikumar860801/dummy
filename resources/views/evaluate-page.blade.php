@@ -1124,75 +1124,7 @@ function handleNoAnswerNext() {
         updateQuestionVisibility();
     }
     
-    function handleFinalSubmit() {
-        let allRequiredFilled = true;
-        
-        for (const groupId of groupOrder) {
-            const attributes = groupedAttributes[groupId];
-            if (!attributes) continue;
-            
-            const groupedByFieldId = {};
-            attributes.forEach(attr => {
-                const fieldId = attr.product_field_id;
-                if (!groupedByFieldId[fieldId]) {
-                    groupedByFieldId[fieldId] = [];
-                }
-                groupedByFieldId[fieldId].push(attr);
-            });
-            
-            for (const [fieldId, options] of Object.entries(groupedByFieldId)) {
-                const isRequired = options[0].is_required === 1;
-                const inputType = options[0].input_type;
-                
-                if (isRequired) {
-                    if (inputType === 'checkbox') {
-                        if (!selectedCheckboxValues[fieldId] || selectedCheckboxValues[fieldId].length === 0) {
-                            allRequiredFilled = false;
-                            break;
-                        }
-                    } else {
-                        if (!selectedRadioValues[fieldId]) {
-                            allRequiredFilled = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!allRequiredFilled) break;
-        }
-        
-        if (!allRequiredFilled && groupOrder.length > 0) {
-            alert('Please complete all required selections before finishing.');
-            return;
-        }
-        
-        if (isSubmitting) return;
-        isSubmitting = true;
-        
-        $finalBtn.prop('disabled', true);
-        $finalBtn.html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
-        
-        const finalData = {
-            model_id: modelId,
-            model_slug: modelSlug,
-            variant_slug: variantSlug,
-            screening_answers: answers,
-            selected_radio_attributes: selectedRadioValues,
-            selected_checkbox_attributes: selectedCheckboxValues,
-            has_issue: hasNoAnswer(),
-            issue_question: hasNoAnswer() ? getFirstNoIndex() + 1 : null
-        };
-        
-        console.log('Final Submission Data:', finalData);
-        sessionStorage.setItem('evaluationData', JSON.stringify(finalData));
-        
-        setTimeout(function() {
-            alert('Evaluation completed successfully!');
-            isSubmitting = false;
-            $finalBtn.prop('disabled', false);
-            $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
-        }, 1000);
-    }
+  
     
     function handleEarlyFinish() {
         if (isSubmitting) return;
@@ -1212,7 +1144,7 @@ function handleNoAnswerNext() {
         isSubmitting = false;
     }
 
-  function handleFinalSubmit() {
+ function handleFinalSubmit() {
     let allRequiredFilled = true;
     
     for (const groupId of groupOrder) {
@@ -1258,7 +1190,7 @@ function handleNoAnswerNext() {
     isSubmitting = true;
     
     $finalBtn.prop('disabled', true);
-    $finalBtn.html('<i class="fas fa-spinner fa-spin"></i> Submitting...');
+    $finalBtn.html('<i class="fas fa-spinner fa-spin"></i> Calculating price...');
     
     // Build the complete submission data
     const finalData = {
@@ -1271,8 +1203,6 @@ function handleNoAnswerNext() {
         has_issue: hasNoAnswer(),
         issue_question: hasNoAnswer() ? getFirstNoIndex() + 1 : null
     };
-    
-    console.log('Final Submission Data:', finalData);
     
     // Prepare payload for price calculation API
     const payload = {
@@ -1287,65 +1217,101 @@ function handleNoAnswerNext() {
     
     console.log('Sending to get_price:', payload);
     
-    // 1. First, call the price calculation API
+    // Get CSRF token
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+    // Call the price calculation API
     $.ajax({
-        url: '/api/get_price',  // Update this to your actual endpoint
+        url: '/api/get_price',
         method: 'POST',
         contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
         data: JSON.stringify(payload),
         success: function(response) {
             console.log('Price API Response:', response);
             
-            if (response.status === 'success') {
-                // Add price to final data
-                finalData.calculated_price = response.price;
-                finalData.base_price = response.base_price;
-                finalData.deductions = response.deductions;
+            // FIX: Check response.success instead of response.status
+            if (response.success === true) {
+                const priceData = response.data;
                 
-                // 2. Then call cart API to save the evaluation
-                $.ajax({
-                    url: '/api/get_price',  // Update this to your actual endpoint
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(finalData),
-                    success: function(cartResponse) {
-                        console.log('Cart API Response:', cartResponse);
-                        
-                        if (cartResponse.status === 'success') {
-                            // Save to sessionStorage as backup
-                            sessionStorage.setItem('evaluationData', JSON.stringify(finalData));
+                // Check if final price is calculated correctly
+                if (priceData.final_price > 0 || priceData.base_price > 0) {
+                    // Add price to final data
+                    finalData.calculated_price = priceData.final_price;
+                    finalData.base_price = priceData.base_price;
+                    finalData.deductions = {
+                        deducted_amount_first: priceData.deducted_amount_first,
+                        deducted_amount_two: priceData.deducted_amount_two
+                    };
+                    
+                    // Now call the cart API
+                    $.ajax({
+                        url: '/put_into_cart',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: JSON.stringify({
+                            model_id: modelId,
+                            final_price: priceData.final_price,
+                            capacity: variantSlug.replace(/-/g, '/'),
+                            item_name: JSON.stringify(priceData)
+                        }),
+                        success: function(cartResponse) {
+                            console.log('Cart API Response:', cartResponse);
                             
-                            alert('Evaluation completed successfully!');
-                            
-                            // Optional: Redirect to next page (cart or offer page)
-                            if (cartResponse.redirect_url) {
-                                window.location.href = cartResponse.redirect_url;
+                            if (cartResponse.success === true) {
+                                // Save to sessionStorage as backup
+                                sessionStorage.setItem('evaluationData', JSON.stringify(finalData));
+                                sessionStorage.setItem('cartData', JSON.stringify({
+                                    model_id: modelId,
+                                    final_price: priceData.final_price,
+                                    capacity: variantSlug.replace(/-/g, '/'),
+                                    order_id: cartResponse.order_id
+                                }));
+                                
+                                alert('Evaluation completed successfully!');
+                                
+                                // Redirect to cart page
+                                window.location.href = '/cart';
+                            } else {
+                                alert('Error saving to cart: ' + (cartResponse.message || 'Please try again'));
+                                $finalBtn.prop('disabled', false);
+                                $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
+                                isSubmitting = false;
                             }
-                        } else {
-                            alert('Error saving evaluation: ' + (cartResponse.message || 'Please try again'));
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Cart API Error:', error);
+                            alert('Failed to save evaluation. Please try again.');
                             $finalBtn.prop('disabled', false);
                             $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
+                            isSubmitting = false;
                         }
-                        isSubmitting = false;
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Cart API Error:', error, xhr.responseText);
-                        alert('Failed to save evaluation. Please try again.');
-                        $finalBtn.prop('disabled', false);
-                        $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
-                        isSubmitting = false;
-                    }
-                });
+                    });
+                } else {
+                    alert('Price calculation returned zero. Please check your selections.');
+                    $finalBtn.prop('disabled', false);
+                    $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
+                    isSubmitting = false;
+                }
             } else {
-                alert('Price calculation failed: ' + (response.message || 'Please try again'));
+                alert('Price calculation failed: ' + (response.error || 'Please try again'));
                 $finalBtn.prop('disabled', false);
                 $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
                 isSubmitting = false;
             }
         },
         error: function(xhr, status, error) {
-            console.error('Price API Error:', error, xhr.responseText);
-            alert('Failed to calculate price. Please try again.');
+            console.error('Price API Error:', error);
+            let errorMsg = 'Failed to calculate price. Please try again.';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMsg = xhr.responseJSON.error;
+            }
+            alert(errorMsg);
             $finalBtn.prop('disabled', false);
             $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
             isSubmitting = false;

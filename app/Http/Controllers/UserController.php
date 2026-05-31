@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+
 class UserController extends Controller
 {
 
@@ -586,8 +588,8 @@ public function particular_model($slug)
         }
         
         // Get the capacity from variant_slug
-        $capacity = $data['variant_slug'] ?? '';
-        
+        $capacity = str_replace('-', '', $data['variant_slug'] ?? '');
+
         // Normalize the input capacity for matching
         // Convert "8gb128gb" to "8GB/128GB"
         $normalized_capacity = $this->normalizeCapacity($capacity);
@@ -1139,6 +1141,7 @@ private function normalizeCapacity($capacity)
 
       public function putIntoCart(Request $request)
     {
+        
         try {
             // Check if user is logged in
             if (!Session::has('user_id')) {

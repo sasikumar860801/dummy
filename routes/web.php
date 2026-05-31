@@ -28,6 +28,7 @@ Route::get('/get_attributes', [UserController::class, 'get_attributes'])->name('
 Route::get('/cart', [UserController::class, 'cart'])->name('cart');
 Route::get('/get_user_details', [UserController::class, 'getUserDetails'])->name('get.user.details');
 Route::post('/submit_sell_order', [UserController::class, 'submitSellOrder'])->name('submit.sell.order');
+Route::post('/put_into_cart', [UserController::class, 'putIntoCart'])->name('put.into.cart');
 
 Route::get('/check-session', function() {
     return response()->json([
