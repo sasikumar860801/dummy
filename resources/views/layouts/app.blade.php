@@ -10,6 +10,8 @@
     <meta name="robots" content="index, follow">
     <meta name="language" content="English">
     <meta name="revisit-after" content="7 days">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     
     <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:title" content="@yield('og_title', 'RevoDevice - Buy & Sell Refurbished Devices')">
@@ -145,6 +147,54 @@
         }
     </style>
     
+   <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #0a0a0f;
+        color: #e2e8f0;
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+    }
+
+    .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 20px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Fix for all sections */
+    main {
+        overflow-x: hidden;
+        width: 100%;
+    }
+
+    /* Fix for all grids */
+    [class*="grid"] {
+        width: 100%;
+    }
+
+    /* Ensure no overflow */
+    img, iframe, video {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+    }
+</style>
+
     @stack('styles')
 </head>
 <body>
