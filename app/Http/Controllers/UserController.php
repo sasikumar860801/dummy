@@ -1288,6 +1288,7 @@ private function normalizeCapacity($capacity)
     // Get cart data from session or database
     $cartData = session()->get('cart_data');
 
+
     if (!$cartData) {
         $userId = Session::get('user_id');
 
@@ -1559,6 +1560,62 @@ public function submitSellOrder(Request $request)
             'message' => $e->getMessage()
         ], 500);
     }
+}
+
+public function view_summary($order_id)
+{
+    $row = DB::table('partial_order_items')
+        ->where('order_id', $order_id)
+        ->first();
+
+    if (!$row) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Order not found'
+        ]);
+    }
+
+    $question = [];
+    $defects = [];
+
+    $itemData = json_decode($row->item_name, true);
+
+    if (
+        isset($itemData['item_name']) &&
+        !empty($itemData['item_name'])
+    ) {
+
+        $summaryData = json_decode($itemData['item_name'], true);
+
+        // Questions
+        if (!empty($summaryData['qa_details'])) {
+
+            foreach ($summaryData['qa_details'] as $qa) {
+
+                $question[] =
+                    ($qa['original_answer'] ?? '') . ' ' .
+                    ($qa['question_name'] ?? '');
+            }
+        }
+
+        // Defects
+        if (!empty($summaryData['yes_question_details'])) {
+
+            foreach ($summaryData['yes_question_details'] as $item) {
+
+                if (!empty($item['label'])) {
+                    $defects[] = $item['label'];
+                }
+            }
+        }
+    }
+
+    return response()->json([
+        'status' => true,
+        'order_id' => $order_id,
+        'question' => $question,
+        'defects' => $defects
+    ]);
 }
 
 }

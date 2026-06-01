@@ -9,4 +9,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/get_price', [UserController::class, 'getPrice'])->name('get.price');
-Route::post('/put_into_cart', [UserController::class, 'putIntoCart'])->name('put.into.cart');
+Route::get('/view_summary/{order_id}', [UserController::class, 'view_summary'])->name('view_summary');

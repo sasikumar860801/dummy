@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
-    
     <h1 style="color: white; font-size: 32px; margin-bottom: 30px;">Your Cart</h1>
     
     @if($cartData && $model)
@@ -13,12 +12,11 @@
             <!-- Model Image -->
             <div style="flex: 0 0 150px; text-align: center;">
                 @if($modelImg)
-                    <img src="{{ $modelImg }}" alt="{{ $model->title }}" style="width: 120px; height: 120px; object-fit: contain;">
+                <img src="{{ $modelImg }}" alt="{{ $model->title }}" style="width: 120px; height: 120px; object-fit: contain;">
                 @else
-                    <i class="fas fa-mobile-alt" style="font-size: 80px; color: #3b82f6;"></i>
+                <i class="fas fa-mobile-alt" style="font-size: 80px; color: #3b82f6;"></i>
                 @endif
             </div>
-            
             <!-- Model Details -->
             <div style="flex: 2;">
                 <h2 style="color: white; font-size: 22px; margin-bottom: 10px;">
@@ -31,7 +29,6 @@
                     <strong>Order ID:</strong> {{ $cartData['order_id'] ?? 'N/A' }}
                 </p>
             </div>
-            
             <!-- Price -->
             <div style="text-align: right;">
                 <p style="color: #94a3b8; font-size: 14px;">Final Price</p>
@@ -75,7 +72,12 @@
             <h3 style="color: white; font-size: 20px; margin: 0;">Order #<span id="summaryOrderId"></span> - Condition Summary</h3>
             <button class="closeModal" style="background: none; border: none; color: #94a3b8; font-size: 28px; cursor: pointer; line-height: 1;">&times;</button>
         </div>
-        <div id="summaryContent" style="padding: 25px;"></div>
+        <div id="summaryContent" style="padding: 25px;">
+            <div style="text-align: center; padding: 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 30px; color: #3b82f6;"></i>
+                <p style="color: #94a3b8; margin-top: 10px;">Loading summary...</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -96,22 +98,18 @@
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Full Name *</label>
                     <input type="text" id="name" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; font-size: 14px;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Mobile Number * (Primary - Not Editable)</label>
                     <input type="tel" id="mobile_no" class="form-input" style="width: 100%; padding: 12px; background: #2a2a3a; border: 1px solid #2a2a3a; border-radius: 10px; color: #94a3b8; font-size: 14px;" readonly>
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Alternate Mobile Number</label>
                     <input type="tel" id="alternate_mob_no" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; font-size: 14px;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Email *</label>
                     <input type="email" id="email" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; font-size: 14px;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Address Type *</label>
                     <select id="address_type" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
@@ -120,32 +118,26 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Address *</label>
                     <textarea id="address" rows="2" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; font-size: 14px; resize: vertical;"></textarea>
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Landmark</label>
                     <input type="text" id="landmark" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">State *</label>
                     <input type="text" id="state" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Pincode *</label>
                     <input type="text" id="pincode" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Pickup Date *</label>
                     <input type="date" id="pickup_date" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Pickup Time Slot *</label>
                     <select id="pickup_time" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
@@ -154,7 +146,6 @@
                         <option value="5PM-10PM">5 PM - 10 PM</option>
                     </select>
                 </div>
-                
                 <div style="margin-bottom: 18px;">
                     <label style="color: white; display: block; margin-bottom: 6px; font-weight: 500;">Payment Method *</label>
                     <select id="payment_method" class="form-input" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white;">
@@ -163,7 +154,6 @@
                         <option value="bank">Bank Transfer</option>
                     </select>
                 </div>
-                
                 <div style="margin-top: 25px;">
                     <button type="submit" id="submitSellBtn" style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 14px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer; font-size: 16px;">
                         Submit Sale <i class="fas fa-check-circle"></i>
@@ -200,7 +190,6 @@
     .summary-item {
         padding: 8px 0;
         border-bottom: 1px solid #2a2a3a;
-        color: #94a3b8;
         font-size: 14px;
         display: flex;
         align-items: center;
@@ -216,7 +205,7 @@
         width: 20px;
         font-size: 14px;
     }
-    .issue-tag {
+    .defect-tag {
         display: inline-block;
         background: #ef4444;
         color: white;
@@ -225,136 +214,113 @@
         font-size: 12px;
         margin: 4px;
     }
-    .issue-tag.green {
+    .defect-tag.green {
         background: #10b981;
     }
-    .price-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #2a2a3a;
-    }
-    .price-row.total {
-        border-top: 2px solid #3b82f6;
-        border-bottom: none;
-        margin-top: 10px;
-        padding-top: 12px;
-        font-weight: bold;
-    }
 </style>
-@endsection
 
-@push('scripts')
-<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
 $(document).ready(function() {
-    const csrfToken = $('meta[name="csrf-token"]').attr('content');
     const orderId = '{{ $cartData['order_id'] ?? '' }}';
-    const partialOrderItemId = '{{ $cartData['id'] ?? '' }}';
-    const modelId = '{{ $model->id ?? '' }}';
     const modelSlug = '{{ $model->sef_url ?? '' }}';
     
-    // Get the evaluation data directly from PHP (already decoded)
-    const evaluationData = @json($cartData['item_name'] ?? []);
-    console.log('Evaluation Data:', evaluationData);
-    
-    // View Summary Button
+    // View Summary Button - Call API and display
     $('#viewSummaryBtn').on('click', function() {
         $('#summaryModal').show();
-        
-        if (evaluationData && Object.keys(evaluationData).length > 0) {
-            displaySummaryModal(evaluationData, orderId);
-        } else {
-            $('#summaryContent').html('<div style="text-align: center; padding: 40px;"><p style="color: #ef4444;">No evaluation data found</p></div>');
-        }
-    });
-    
-    // Display summary modal
-    function displaySummaryModal(data, orderId) {
         $('#summaryOrderId').text(orderId);
         
-        let qaHtml = '<div class="summary-section"><h4>📋 Condition Assessment</h4>';
-        
-        // Process QA details
-        if (data.qa_details && data.qa_details.length > 0) {
-            data.qa_details.forEach(function(qa) {
-                const statusClass = qa.processed_answer === 'yes' ? 'yes' : 'no';
-                const statusIcon = qa.processed_answer === 'yes' ? '✅' : '❌';
-                const answerText = qa.processed_answer === 'yes' ? 'Yes' : 'No';
-                qaHtml += '<div class="summary-item ' + statusClass + '">';
-                qaHtml += '<span class="summary-icon">' + statusIcon + '</span>';
-                qaHtml += '<span><strong>' + answerText + '</strong> - ' + qa.question_name + '</span>';
-                qaHtml += '</div>';
-            });
-        } else {
-            qaHtml += '<div class="summary-item">No condition data available</div>';
-        }
-        qaHtml += '</div>';
-        
-        // Process issues from selected attributes
-        let issues = [];
-        let goodConditions = [];
-        
-        if (data.yes_question_details && data.yes_question_details.length > 0) {
-            data.yes_question_details.forEach(function(item) {
-                if (item.label) {
-                    if (Array.isArray(item.label)) {
-                        item.label.forEach(function(label) {
-                            if (label.toLowerCase().includes('no') || label.toLowerCase().includes('good') || label.toLowerCase().includes('working')) {
-                                goodConditions.push(label);
-                            } else {
-                                issues.push(label);
-                            }
-                        });
-                    } else {
-                        if (item.label.toLowerCase().includes('no') || item.label.toLowerCase().includes('good') || item.label.toLowerCase().includes('working')) {
-                            goodConditions.push(item.label);
-                        } else {
-                            issues.push(item.label);
-                        }
-                    }
-                }
-            });
-        }
-        
-        let issuesHtml = '';
-        if (issues.length > 0) {
-            issuesHtml = '<div class="summary-section"><h4>⚠️ Reported Issues / Conditions</h4><div>';
-            issues.forEach(function(issue) {
-                issuesHtml += '<span class="issue-tag">' + issue + '</span> ';
-            });
-            issuesHtml += '</div></div>';
-        }
-        
-        let goodHtml = '';
-        if (goodConditions.length > 0) {
-            goodHtml = '<div class="summary-section"><h4>✅ Good Conditions</h4><div>';
-            goodConditions.forEach(function(condition) {
-                goodHtml += '<span class="issue-tag green">' + condition + '</span> ';
-            });
-            goodHtml += '</div></div>';
-        }
-        
-        // Price Details
-        const finalPrice = data.final_price || '{{ $cartData['final_price'] ?? 0 }}';
-        const basePrice = data.base_price || 0;
-        const deductedAmount = data.deducted_amount_two || 0;
-        
-        const priceHtml = `
-            <div class="summary-section">
-                <h4>💰 Price Details</h4>
-                <div class="price-row"><span>Base Price</span><span>₹${formatNumber(basePrice)}</span></div>
-                <div class="price-row"><span>Deductions</span><span>- ₹${formatNumber(Math.abs(deductedAmount))}</span></div>
-                <div class="price-row total"><span>Final Price</span><span style="color: #3b82f6; font-size: 18px;">₹${formatNumber(finalPrice)}</span></div>
+        // Show loading
+        $('#summaryContent').html(`
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #3b82f6;"></i>
+                <p style="color: #94a3b8; margin-top: 15px;">Loading summary...</p>
             </div>
-        `;
+        `);
         
-        $('#summaryContent').html(qaHtml + goodHtml + issuesHtml + priceHtml);
+        // Call the API
+        $.ajax({
+            url: '/api/view_summary/' + orderId,
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === true) {
+                    displaySummary(response);
+                } else {
+                    $('#summaryContent').html(`
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #ef4444;"></i>
+                            <p style="color: #ef4444; margin-top: 15px;">Failed to load summary</p>
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('API Error:', error);
+                $('#summaryContent').html(`
+                    <div style="text-align: center; padding: 40px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #ef4444;"></i>
+                        <p style="color: #ef4444; margin-top: 15px;">Error loading summary. Please try again.</p>
+                    </div>
+                `);
+            }
+        });
+    });
+    
+    // Display summary from API response
+   // Display summary from API response
+function displaySummary(data) {
+    let html = '';
+    
+    // Condition Assessment Section
+    html += '<div class="summary-section">';
+    html += '<h4>📋 Condition Assessment</h4>';
+    
+    if (data.question && data.question.length > 0) {
+        data.question.forEach(function(q) {
+            // Check if the question starts with "yes" or "no"
+            const isYes = q.toLowerCase().startsWith('yes');
+            const statusClass = isYes ? 'yes' : 'no';
+            const statusIcon = isYes ? '✅' : '❌';
+            const answerText = isYes ? 'Yes' : 'No';
+            // Remove "yes " or "no " from the beginning to get question text
+            const questionText = q.replace(/^(yes|no)\s/i, '');
+            
+            html += '<div class="summary-item ' + statusClass + '">';
+            html += '<span class="summary-icon">' + statusIcon + '</span>';
+            html += '<span><strong>' + answerText + '</strong> - ' + escapeHtml(questionText) + '</span>';
+            html += '</div>';
+        });
+    }
+    html += '</div>';
+    
+    // Reported Issues / Conditions Section - Just show all defects
+    html += '<div class="summary-section">';
+    html += '<h4>⚠️ Reported Issues / Conditions</h4>';
+    html += '<div>';
+    
+    if (data.defects && data.defects.length > 0) {
+        data.defects.forEach(function(defect) {
+            html += '<span class="defect-tag">' + escapeHtml(defect) + '</span> ';
+        });
+    } else {
+        html += '<span class="defect-tag green">No issues reported</span>';
     }
     
-    // Format number
-    function formatNumber(num) {
-        return parseFloat(num).toLocaleString('en-IN');
+    html += '</div></div>';
+    
+    $('#summaryContent').html(html);
+}
+    
+    // Escape HTML to prevent XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
     
     // Reevaluate Button
@@ -387,7 +353,6 @@ $(document).ready(function() {
         $.ajax({
             url: '/get_user_details',
             method: 'GET',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
             success: function(response) {
                 if (response.success) {
                     const user = response.data;
@@ -457,7 +422,9 @@ $(document).ready(function() {
         $.ajax({
             url: '/submit_sell_order',
             method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             data: formData,
             success: function(response) {
                 if (response.success) {
@@ -479,4 +446,4 @@ $(document).ready(function() {
     });
 });
 </script>
-@endpush
+@endsection
