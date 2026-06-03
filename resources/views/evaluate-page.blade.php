@@ -1286,7 +1286,14 @@ function handleNoAnswerNext() {
                         },
                         error: function(xhr, status, error) {
                             console.error('Cart API Error:', error);
-                            alert('Failed to save evaluation. Please try again.');
+                                 $('#loginTitle').text('Unlock Your Exact Price');
+
+                                $('#loginSubtitle').text(
+                                    'Sign in to view your final device value and continue with your order.'
+                                );
+
+                                $('#loginBtn').trigger('click');
+                            // alert('Failed to save evaluation. Please try again.');
                             $finalBtn.prop('disabled', false);
                             $finalBtn.html('Finish Evaluation <i class="fas fa-check-circle"></i>');
                             isSubmitting = false;

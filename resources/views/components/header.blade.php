@@ -22,7 +22,7 @@
             </div>
 
             <!-- Location & User -->
-            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div id="userSection" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 8px; background: #1a1a2e; padding: 8px 16px; border-radius: 30px; cursor: pointer;">
                     <i class="fas fa-map-marker-alt" style="color: #3b82f6;"></i>
                     <span style="font-size: 14px;">New Delhi</span>
@@ -65,8 +65,13 @@
         
         <div id="phoneStep" style="text-align: center;">
             <i class="fas fa-mobile-alt" style="font-size: 50px; color: #3b82f6; margin-bottom: 20px;"></i>
-            <h3 style="color: white; margin-bottom: 10px;">Login / Signup</h3>
-            <p style="color: #94a3b8; margin-bottom: 25px; font-size: 14px;">Enter your mobile number to continue</p>
+            <h3 id="loginTitle" style="color: white; margin-bottom: 10px;">
+                Login / Signup
+            </h3>
+
+            <p id="loginSubtitle" style="color: #94a3b8; margin-bottom: 25px; font-size: 14px;">
+                    Enter your mobile number to continue
+                </p>
             
             <input type="tel" id="mobileNumber" maxlength="10" placeholder="Enter 10-digit mobile number" 
                    style="width: 100%; padding: 14px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; font-size: 16px; margin-bottom: 20px; text-align: center;">
@@ -266,10 +271,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
                 
-                if (data.success) {
+               if (data.success) {
+
                     loginPopup.style.display = 'none';
-                    window.location.reload();
-                } else {
+
+                    document.getElementById('userSection').innerHTML = `
+                        <div class="user-dropdown" style="position: relative; z-index: 10000;">
+                            <button class="user-btn" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 8px 20px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-user-circle"></i>
+                                <span id="userNameSpan">${data.user.name}</span>
+                                <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                            </button>
+
+                            <div class="user-dropdown-content" style="position: absolute; top: 100%; right: 0; background: #1a1a2e; min-width: 180px; border-radius: 12px; padding: 8px 0; opacity: 0; visibility: hidden; transition: all 0.2s; border: 1px solid #2a2a3a; z-index: 10001; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);">
+                                <a href="#" id="profileLink" style="display:block;padding:10px 20px;color:#cbd5e1;text-decoration:none;font-size:13px;">
+                                    <i class="fas fa-user" style="margin-right:8px;"></i> My Profile
+                                </a>
+
+                                <a href="#" id="logoutBtn" style="display:block;padding:10px 20px;color:#cbd5e1;text-decoration:none;font-size:13px;">
+                                    <i class="fas fa-sign-out-alt" style="margin-right:8px;"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    attachLogoutEvent(); // re-bind logout event
+                    trigger_final_btn();
+                }
+
+else {
                     otpError.textContent = data.message || 'Invalid OTP';
                     otpError.style.display = 'block';
                 }
@@ -321,17 +351,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 });
-                
+                   window.location.reload();
+
                 const data = await response.json();
                 
                 if (data.success) {
                     // Force immediate page reload to update UI
-                    window.location.href = data.redirect || '/';
+                   window.location.reload();
                 }
             } catch (error) {
                 console.error('Logout error:', error);
                 // Force reload on error
-                window.location.href = '/';
+                window.location.reload();
             }
         });
     }
@@ -341,6 +372,10 @@ document.addEventListener('DOMContentLoaded', function() {
                document.getElementById('otp2').value +
                document.getElementById('otp3').value +
                document.getElementById('otp4').value;
+    }
+
+    function trigger_final_btn(){
+        $('#finalBtn').trigger('click');
     }
     
     function clearOtpInputs() {
@@ -352,5 +387,31 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('otp1').focus();
         }
     }
+
+    function attachLogoutEvent() {
+
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+
+        const response = await fetch('{{ route("logout") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
 });
 </script>

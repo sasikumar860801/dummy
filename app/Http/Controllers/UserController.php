@@ -340,7 +340,9 @@ public function tablet_models($slug)
         ]);
     }
     
-    return redirect('/');
+      return response()->json([
+        'success' => true
+    ]);
 }
 
 public function particular_model($slug)
@@ -679,56 +681,60 @@ public function particular_model($slug)
         
         // Get all product fields and options for the selected attributes
         if (!empty($selected_attributes)) {
-            foreach ($selected_attributes as $field_id => $option_id) {
-                // Get product field details
-                $product_field = DB::table('product_fields')
-                    ->where('id', $field_id)
-                    ->first();
-                
-                // Get option details
-                $option = DB::table('product_options')
-                    ->where('id', $option_id)
-                    ->first();
-                
-                if ($product_field && $option) {
-                    // Calculate amount based on price_type
-                    $amount = 0;
-                    if ($option->price_type == 1) {
-                        // Fixed amount
-                        $amount = floatval($option->price);
-                    } else {
-                        // Percentage of base price
-                        $percentage = floatval($option->price);
-                        $amount = ($base_price * $percentage / 100);
-                    }
-                    
-                    // Check add_sub
-                    $add_sub = trim($option->add_sub ?? '+');
-                    if ($add_sub === '-') {
-                        $deducted_amount_two -= $amount;
-                    } else {
-                        $deducted_amount_two += $amount;
-                    }
-                    
-                    // Find which question this field belongs to
-                    $question_id = $product_field->question_no_id ?? null;
-                    
-                    $yes_question_details[] = [
-                        'question_id' => $question_id,
-                        'field_id' => $field_id,
-                        'option_id' => $option_id,
-                        'label' => $option->label,
-                        'add_sub' => $add_sub,
-                        'calculated_amount' => $amount
-                    ];
-                }
-            }
+// dd($selected_attributes);
+
+            foreach ($selected_attributes as $field_id => $option_ids) {
+
+    if (!is_array($option_ids)) {
+        $option_ids = [$option_ids];
+    }
+
+    foreach ($option_ids as $option_id) {
+
+        $product_field = DB::table('product_fields')
+            ->where('id', $field_id)
+            ->first();
+
+        $option = DB::table('product_options')
+            ->where('id', $option_id)
+            ->first();
+
+        if (!$product_field || !$option) {
+            continue;
+        }
+
+        if ($option->price_type == 1) {
+
+            $amount = (float)$option->price;
+
+        } else {
+
+            $amount = ($base_price * (float)$option->price) / 100;
+        }
+
+        $add_sub = trim($option->add_sub ?? '+');
+
+        if ($add_sub == '-') {
+            $deducted_amount_two -= $amount;
+        } else {
+            $deducted_amount_two += $amount;
+        }
+
+        $yes_question_details[] = [
+            'question_id' => $product_field->question_no_id,
+            'field_id' => $field_id,
+            'option_id' => $option_id,
+            'label' => $option->label,
+            'add_sub' => $add_sub,
+            'calculated_amount' => $amount
+        ];
+    }
+}
         }
         
         // Calculate final price
         $final_price = $base_price + $deducted_amount_two;
         $final_price = max(0, $final_price);
-        
         return response()->json([
             'success' => true,
             'data' => [
@@ -787,357 +793,7 @@ private function normalizeCapacity($capacity)
     /**
      * Calculate price logic
      */
-    private function calculatePrice($payload)
-    {
-        $device_id = $payload['device_id'] ?? null;
-        $form_data = $payload['form_data'] ?? [];
-        $qa_answers = $form_data['qa_answers'] ?? [];
-        $capacity = $payload['capacity'] ?? null;
-        $model_id = $form_data['model_id'] ?? $payload['model_id'] ?? null;
-        
-        // Parse field_answers from new structure (grouped by numbers)
-        $field_answers_flat = [];
-        if (isset($form_data['field_answers'])) {
-            foreach ($form_data['field_answers'] as $group => $fields) {
-                foreach ($fields as $field_id => $field_data) {
-                    $field_answers_flat[$field_id] = $field_data;
-                }
-            }
-        }
-        
-        // STEP 1: Set base price
-        $base_price = 0;
-        $model = null;
-        
-        if ($model_id) {
-            $model = DB::table('model')->where('id', $model_id)->first();
-            
-            if ($model) {
-                // Check if capacity is provided
-                $capacity_to_use = $capacity ?: ($form_data['capacity'] ?? null);
-                
-                if (!empty($capacity_to_use)) {
-                    // Decode capacity JSON from model
-                    $model_capacities = json_decode($model->capacity, true);
-                    
-                    if (is_array($model_capacities)) {
-                        // Find matching capacity
-                        $found = false;
-                        $normalized_input = strtoupper(preg_replace('/\s+/', '', $capacity_to_use));
-                        
-                        foreach ($model_capacities as $model_cap) {
-                            $normalized_model_cap = strtoupper(preg_replace('/\s+/', '', $model_cap['capacity']));
-                            
-                            if ($normalized_model_cap == $normalized_input) {
-                                $base_price = floatval($model_cap['base_price']);
-                                $found = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!$found) {
-                            $base_price = floatval($model->price);
-                        }
-                    } else {
-                        $base_price = floatval($model->price);
-                    }
-                } else {
-                    $base_price = floatval($model->price);
-                }
-            }
-        }
-        
-        // NEW CONDITION: Check if first QA answer is "no"
-        $skip_calculation = false;
-        if (!empty($qa_answers)) {
-            // Sort questions by key (question number) to get the first one
-            ksort($qa_answers);
-            
-            // Get the first question ID and its answer
-            $first_question_id = array_key_first($qa_answers);
-            $first_answer = $qa_answers[$first_question_id] ?? null;
-            
-            // If the first answer is "no", set final price to model's least_price
-            if (strtolower($first_answer) === 'no') {
-                $skip_calculation = true;
-                $final_price = floatval($model->least_price ?? 0);
-                
-                return [
-                    'base_price' => $base_price,
-                    'model_id' => $model_id,
-                    'deducted_amount_first' => 0,
-                    'deducted_amount_two' => 0,
-                    'final_price' => $final_price,
-                    'qa_details' => [],
-                    'no_question_details' => [],
-                    'yes_question_details' => [],
-                    'processed_answers' => $qa_answers,
-                    'skip_calculation_reason' => 'First QA answer is "no"',
-                    'first_question_id' => $first_question_id,
-                    'first_answer' => $first_answer,
-                    'model_least_price' => floatval($model->least_price ?? 0),
-                    'field_answers_structure' => 'grouped'
-                ];
-            }
-        }
-        
-        // STEP 2: Process QA answers - if any answer is "no", set all subsequent answers to "no"
-        $processed_qa_answers = [];
-        $qa_details = [];
-        $found_no = false;
-        
-        ksort($qa_answers);
-        
-        foreach ($qa_answers as $question_id => $answer) {
-            if ($found_no) {
-                $processed_qa_answers[$question_id] = 'no';
-            } elseif (strtolower($answer) === 'no') {
-                $processed_qa_answers[$question_id] = 'no';
-                $found_no = true;
-            } else {
-                $processed_qa_answers[$question_id] = 'yes';
-            }
-        }
-        
-        // Get QA question names from database
-        $qa_names = [];
-        if (!empty($qa_answers)) {
-            $question_ids = array_keys($qa_answers);
-            $qa_names_data = DB::table('qa')
-                ->whereIn('id', $question_ids)
-                ->select('id', 'name')
-                ->get();
-            
-            foreach ($qa_names_data as $qa) {
-                $qa_names[$qa->id] = $qa->name;
-            }
-            
-            // Prepare QA details with names
-            foreach ($qa_answers as $question_id => $answer) {
-                $qa_details[] = [
-                    'question_id' => $question_id,
-                    'question_name' => $qa_names[$question_id] ?? 'Question ' . $question_id,
-                    'original_answer' => $answer,
-                    'processed_answer' => $processed_qa_answers[$question_id] ?? $answer
-                ];
-            }
-        }
-        
-        // Separate yes and no questions from PROCESSED answers
-        $no_questions = [];
-        $yes_questions = [];
-        
-        foreach ($processed_qa_answers as $question_id => $answer) {
-            if (strtolower($answer) === 'no') {
-                $no_questions[] = $question_id;
-            } elseif (strtolower($answer) === 'yes') {
-                $yes_questions[] = $question_id;
-            }
-        }
-        
-        // STEP 3: Calculate deducted_amount_first from NO questions
-        $deducted_amount_first = 0;
-        $addition_amount_step3 = 0;
-        $sub_amount_step3 = 0;
-        $no_question_details = [];
-        
-        if (!empty($no_questions)) {
-            // Get product fields for no questions
-            $no_fields = DB::table('product_fields as pf')
-                ->select('pf.question_no_id', 'pf.no_question_operator', 'pf.no_question_type', 'pf.no_question_value')
-                ->whereIn('pf.question_no_id', $no_questions)
-                ->where('pf.product_id', $model_id)
-                ->whereNotNull('pf.no_question_operator')
-                ->whereNotNull('pf.no_question_type')
-                ->groupBy('pf.question_no_id')
-                ->get();
-            
-            foreach ($no_fields as $field) {
-                $question_id = $field->question_no_id;
-                $operator = trim($field->no_question_operator ?? '+');
-                $type = strtolower(trim($field->no_question_type ?? 'baseprice'));
-                $value = floatval($field->no_question_value ?? 0);
-                
-                if ($value == 0) continue;
-                
-                $amount = 0;
-                if ($type === 'baseprice') {
-                    $amount = ($base_price * $value) / 100;
-                } elseif ($type === 'fixed') {
-                    $amount = $value;
-                }
-                
-                // Accumulate based on operator
-                if ($operator === '+') {
-                    $addition_amount_step3 += $amount;
-                } elseif ($operator === '-') {
-                    $sub_amount_step3 += $amount;
-                }
-                
-                // Store details
-                $no_question_details[] = [
-                    'question_id' => $question_id,
-                    'question_name' => $qa_names[$question_id] ?? 'Question ' . $question_id,
-                    'operator' => $operator,
-                    'type' => $type,
-                    'value' => $value,
-                    'base_price' => $base_price,
-                    'calculated_amount' => $amount,
-                    'applied_as' => ($operator === '+' ? 'addition' : 'subtraction')
-                ];
-            }
-            
-            // CORRECT CALCULATION: Net effect = additions - subtractions
-            $deducted_amount_first = $addition_amount_step3 - $sub_amount_step3;
-        }
-        
-        // STEP 4: Calculate deducted_amount_two from YES questions
-        $deducted_amount_two = 0;
-        $addition_amount_step4 = 0;
-        $sub_amount_step4 = 0;
-        $yes_question_details = [];
-        
-        if (!empty($yes_questions)) {
-            foreach ($yes_questions as $question_no_id) {
-                // Find all product fields for this question_no_id
-                $field_ids_for_question = DB::table('product_fields')
-                    ->where('question_no_id', $question_no_id)
-                    ->where('product_id', $model_id)
-                    ->pluck('id')
-                    ->toArray();
-                
-                // Initialize question details
-                $question_detail = [
-                    'question_id' => $question_no_id,
-                    'question_name' => $qa_names[$question_no_id] ?? 'Question ' . $question_no_id,
-                    'selected_options' => [],
-                    'fields_processed' => []
-                ];
-                
-                // Calculate amount for each field
-                foreach ($field_ids_for_question as $field_id) {
-                    if (isset($field_answers_flat[$field_id])) {
-                        $field_data = $field_answers_flat[$field_id];
-                        
-                        // Handle both 'value' and 'values' from payload
-                        $selected_values = [];
-                        
-                        if (isset($field_data['value'])) {
-                            $selected_values[] = $field_data['value'];
-                        } elseif (isset($field_data['values'])) {
-                            if (is_array($field_data['values'])) {
-                                $selected_values = $field_data['values'];
-                            } else {
-                                $selected_values = [$field_data['values']];
-                            }
-                        }
-                        
-                        $question_detail['fields_processed'][] = [
-                            'field_id' => $field_id,
-                            'has_data' => true,
-                            'selected_values_count' => count($selected_values),
-                            'selected_values' => $selected_values
-                        ];
-                        
-                        if (!empty($selected_values)) {
-                            // Get options from database
-                            $options = DB::table('product_options')
-                                ->where('product_field_id', $field_id)
-                                ->whereIn('label', $selected_values)
-                                ->select('id', 'label', 'price_type', 'price', 'add_sub')
-                                ->get();
-                            
-                            foreach ($options as $option) {
-                                $amount = 0;
-                                if ($option->price_type == 1) {
-                                    // Fixed amount
-                                    $amount = floatval($option->price);
-                                } else {
-                                    // Percentage of base price
-                                    $percentage = floatval($option->price);
-                                    $amount = ($base_price * $percentage / 100);
-                                }
-                                
-                                // Check add_sub column
-                                $add_sub = trim($option->add_sub ?? '');
-                                if ($add_sub === '+') {
-                                    $addition_amount_step4 += $amount;
-                                } elseif ($add_sub === '-') {
-                                    $sub_amount_step4 += $amount;
-                                } else {
-                                    $addition_amount_step4 += $amount;
-                                }
-                                
-                                // Store selected option details
-                                $question_detail['selected_options'][] = [
-                                    'field_id' => $field_id,
-                                    'option_id' => $option->id,
-                                    'label' => $option->label,
-                                    'price_type' => $option->price_type,
-                                    'price' => $option->price,
-                                    'add_sub' => $add_sub,
-                                    'calculated_amount' => $amount
-                                ];
-                            }
-                            
-                            if ($options->isEmpty()) {
-                                $question_detail['fields_processed'][] = [
-                                    'field_id' => $field_id,
-                                    'warning' => 'No matching options found in database',
-                                    'selected_values' => $selected_values
-                                ];
-                            }
-                        } else {
-                            $question_detail['fields_processed'][] = [
-                                'field_id' => $field_id,
-                                'warning' => 'No values found in payload for this field',
-                                'field_data' => $field_data
-                            ];
-                        }
-                    } else {
-                        $question_detail['fields_processed'][] = [
-                            'field_id' => $field_id,
-                            'warning' => 'Field not found in payload'
-                        ];
-                    }
-                }
-                
-                $yes_question_details[] = $question_detail;
-            }
-            
-            // Calculate deducted_amount_two
-            $deducted_amount_two = $addition_amount_step4 - $sub_amount_step4;
-        }
-        
-        // Calculate final price
-        $final_price = $base_price + $deducted_amount_first + $deducted_amount_two;
-        
-        // Ensure price doesn't go below 0
-        $final_price = max(0, $final_price);
-        
-        return [
-            'base_price' => $base_price,
-            'model_id' => $model_id,
-            'deducted_amount_first' => $deducted_amount_first,
-            'deducted_amount_two' => $deducted_amount_two,
-            'final_price' => $final_price,
-            'step3_details' => [
-                'addition_amount' => $addition_amount_step3,
-                'sub_amount' => $sub_amount_step3
-            ],
-            'step4_details' => [
-                'addition_amount' => $addition_amount_step4,
-                'sub_amount' => $sub_amount_step4
-            ],
-            'qa_details' => $qa_details,
-            'no_question_details' => $no_question_details,
-            'yes_question_details' => $yes_question_details,
-            'processed_answers' => $processed_qa_answers,
-            'field_answers_structure' => 'grouped',
-            'field_answers_flat_count' => count($field_answers_flat),
-            'field_answers_groups' => isset($form_data['field_answers']) ? array_keys($form_data['field_answers']) : []
-        ];
-    }
+
 
       public function putIntoCart(Request $request)
     {
@@ -1459,63 +1115,47 @@ public function submitSellOrder(Request $request)
             ->update([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
-                'other_phone' => $request->input('alternate_mob_no'),
+                'alternate_mob_no' => $request->input('alternate_mob_no'),
                 'updated_at' => now()
             ]);
         
         // Handle address
         $addressType = $request->input('address_type');
-        $existingAddress = DB::table('address')
-            ->where('user_id', $userId)
-            ->where('address_type', $addressType)
-            ->first();
-        
-        if ($existingAddress) {
-            DB::table('address')
-                ->where('id', $existingAddress->id)
-                ->update([
-                    'name' => $request->input('name'),
-                    'mobile_no' => $request->input('mobile_no'),
-                    'alternate_mob_no' => $request->input('alternate_mob_no'),
-                    'landmark' => $request->input('landmark'),
-                    'state' => $request->input('state'),
-                    'pincode' => $request->input('pincode'),
-                    'address' => $request->input('address'),
-                    'updated_at' => now()
-                ]);
-            $addressId = $existingAddress->id;
-        } else {
-            $addressId = DB::table('address')->insertGetId([
-                'user_id' => $userId,
-                'name' => $request->input('name'),
-                'mobile_no' => $request->input('mobile_no'),
-                'alternate_mob_no' => $request->input('alternate_mob_no'),
-                'landmark' => $request->input('landmark'),
-                'address_type' => $addressType,
-                'state' => $request->input('state'),
-                'pincode' => $request->input('pincode'),
-                'address' => $request->input('address'),
-                'created_at' => now()
-            ]);
-        }
+    
         
         // Create order
         $allDetailsJson = json_encode($request->all());
         $paymentMethod = $request->input('payment_method');
         
-        $orderData = [
-            'user_id' => $userId,
-            'order_id' => $orderId,
-            'payment_method' => $paymentMethod,
-            'shipping_pickup_date' => $request->input('pickup_date'),
-            'status' => 'pending',
-            'sales_pack' => 'we_come_for_you',
-            'address_id' => $addressId,
-            'shipping_pickup_time' => $request->input('pickup_time'),
-            'email_while_add_to_cart' => $request->input('email'),
-            'all_details' => $allDetailsJson,
-            'created_at' => now()
-        ];
+       $orderData = [
+    'user_id' => $userId,
+    'order_id' => $orderId,
+
+    'partial_order_item_id' => $partialOrderItemId,
+    'model_id' => $modelId,
+
+    'name' => $request->input('name'),
+    'mobile_no' => $request->input('mobile_no'),
+    'alternate_mob_no' => $request->input('alternate_mob_no'),
+    'email' => $request->input('email'),
+
+    'address_type' => $request->input('address_type'),
+    'state' => $request->input('state'),
+    'pincode' => $request->input('pincode'),
+    'address' => $request->input('address'),
+    'landmark' => $request->input('landmark'),
+
+    'payment_method' => $request->input('payment_method'),
+    'status' => 'pending',
+
+    'shipping_pickup_date' => $request->input('pickup_date'),
+    'shipping_pickup_time' => $request->input('pickup_time'),
+
+    'all_details' => json_encode($request->all()),
+
+    'created_at' => now(),
+    'updated_at' => now()
+];
         
         $orderMainId = DB::table('orders')->insertGetId($orderData);
         
@@ -1577,6 +1217,7 @@ public function view_summary($order_id)
 
     $question = [];
     $defects = [];
+    $optionIds = [];
 
     $itemData = json_decode($row->item_name, true);
 
@@ -1598,15 +1239,39 @@ public function view_summary($order_id)
             }
         }
 
-        // Defects
+        // Collect option ids from yes_question_details
         if (!empty($summaryData['yes_question_details'])) {
 
             foreach ($summaryData['yes_question_details'] as $item) {
 
-                if (!empty($item['label'])) {
-                    $defects[] = $item['label'];
+                if (!isset($item['option_id'])) {
+                    continue;
+                }
+
+                if (is_array($item['option_id'])) {
+
+                    $optionIds = array_merge(
+                        $optionIds,
+                        $item['option_id']
+                    );
+
+                } else {
+
+                    $optionIds[] = $item['option_id'];
                 }
             }
+        }
+
+        // Remove duplicate ids
+        $optionIds = array_unique($optionIds);
+
+        // Get actual option labels from product_options table
+        if (!empty($optionIds)) {
+
+            $defects = DB::table('product_options')
+                ->whereIn('id', $optionIds)
+                ->pluck('label')
+                ->toArray();
         }
     }
 
