@@ -39,4 +39,12 @@ Route::get('/check-session', function() {
     ]);
 });
 
+
+Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+Route::get('/my-cart', [UserController::class, 'my_cart'])->name('my-cart');
+Route::get('/my-orders', [UserController::class, 'my_orders'])->name('my-orders');
+Route::post('/cancel-order', [UserController::class, 'cancel_order'])->name('cancel.order');
+
+
 // http://127.0.0.1:8000/sell-old-phone/sell-oneplus

@@ -1283,4 +1283,167 @@ public function view_summary($order_id)
     ]);
 }
 
+public function profile()
+    {
+        // 1. Fetch user ID from session
+        $userId = Session::get('user_id');
+
+        if (!$userId) {
+            return redirect('/')->with('error', 'Please login to access your profile.');
+        }
+
+        // 2. Query user data matching your schema
+        $user = DB::table('users')->where('id', $userId)->first();
+
+        if (!$user) {
+            Session::flush();
+            return redirect('/')->with('error', 'User record not found.');
+        }
+
+        // 3. Array of Indian States for Select2 Dropdown
+        $states = [
+            'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 
+            'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 
+            'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 
+            'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 
+            'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 
+            'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 
+            'Ladakh', 'Lakshadweep', 'Puducherry'
+        ];
+
+        // 4. Return view inside the organized users folder
+        return view('users.profile', compact('user', 'states'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $userId = Session::get('user_id');
+        if (!$userId) return response()->json(['success' => false, 'message' => 'Unauthorized']);
+
+        $request->validate([
+            'email' => 'nullable|email|max:255',
+            'alternate_mob_no' => 'nullable|digits:10',
+            'address' => 'nullable|string',
+            'landmark' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|digits:6',
+        ]);
+
+        DB::table('users')->where('id', $userId)->update([
+            'name' => $request->name ??'guest',
+            'email' => $request->email,
+            'alternate_mob_no' => $request->alternate_mob_no,
+            'address' => $request->address,
+            'landmark' => $request->landmark,
+            'state' => $request->state,
+            'pincode' => $request->pincode,
+            'updated_at' => now(),
+        ]);
+
+        // Dynamically update session username if it changed
+        Session::put('user_name', $request->name);
+
+        return response()->json(['success' => true, 'message' => 'Profile updated successfully!']);
+    }
+
+    public function my_cart()
+    {
+        $userId = Session::get('user_id');
+
+        if (!$userId) {
+            return redirect('/')->with('error', 'Please log in to view your cart.');
+        }
+
+        // Fetch user data for the auto-fill form inside modals
+        $user = DB::table('users')->where('id', $userId)->first();
+
+        // Query all items matching: status = pending, sorted DESC
+        $cartItems = DB::table('partial_order_items')
+            ->where('user_id', $userId)
+            ->where('status', 'pending')
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        // Process images, model names, and details for each item
+        foreach ($cartItems as $item) {
+            $model = DB::table('model')->where('id', $item->model_id)->first();
+            $brand = $model ? DB::table('brand')->where('id', $model->brand_id)->first() : null;
+
+            // Media binding rules
+            $item->model_title = $model ? $model->title : $item->item_name;
+            $item->title = $brand ? $brand->title : '';
+            $item->model_slug = $model ? $model->sef_url : '';
+            
+            $item->model_img = ($model && !empty($model->model_img)) 
+                ? url('media/images/model/' . $model->model_img) 
+                : null;
+        }
+
+        // Reuse the profile sidebar framework inside the organized users folder
+        return view('users.cart', compact('cartItems', 'user'));
+    }
+
+    public function my_orders()
+    {
+        $userId = Session::get('user_id');
+        if (!$userId) {
+            return redirect('/')->with('error', 'Please log in to view your orders.');
+        }
+
+        $user = DB::table('users')->where('id', $userId)->first();
+
+        // Fetch all finalized orders joining order_items data records
+        $orders = DB::table('orders')
+            ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+            ->where('orders.user_id', $userId)
+            ->select('order_items.*', 'orders.status as final_order_status', 'orders.shipping_pickup_date', 'orders.shipping_pickup_time')
+            ->orderBy('order_items.id', 'DESC')
+            ->get();
+
+        // Map media bindings dynamically
+        foreach ($orders as $order) {
+            $model = DB::table('model')->where('id', $order->model_id)->first();
+            $brand = $model ? DB::table('brand')->where('id', $model->brand_id)->first() : null;
+
+            $order->model_title = $model ? $model->title : $order->item_name;
+            $order->title = $brand ? $brand->title : '';
+            $order->model_slug = $model ? $model->sef_url : '';
+            $order->model_img = ($model && !empty($model->model_img)) 
+                ? url('media/images/model/' . $model->model_img) 
+                : null;
+        }
+
+        // Group into distinct collections for simple UI execution
+        $pendingOrders = $orders->where('status', 'pending');
+        $completedOrders = $orders->where('status', 'completed');
+        
+        // Match both 'cancelled' or 'reject' entries depending on DB status
+        $cancelledOrders = $orders->filter(function($item) {
+            return in_array($item->status, ['cancelled', 'cancelled', 'reject']);
+        });
+
+        return view('users.orders', compact('user', 'pendingOrders', 'completedOrders', 'cancelledOrders'));
+    }
+
+    public function cancel_order(Request $request)
+    {
+        $userId = Session::get('user_id');
+        $orderId = $request->input('order_id');
+
+        if (!$userId) return response()->json(['success' => false, 'message' => 'Unauthorized access.']);
+
+        // Check if item exists and belongs to user
+        $exists = DB::table('orders')->where('order_id', $orderId)->where('user_id', $userId)->exists();
+
+        if ($exists) {
+            // Update master table and dependent data items to 'reject' status mapping rules
+            DB::table('orders')->where('order_id', $orderId)->update(['status' => 'reject', 'updated_at' => now()]);
+            DB::table('order_items')->where('order_id', $orderId)->update(['status' => 'reject', 'updated_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => 'Order cancelled successfully!']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Order reference not found.']);
+    }
+
 }
