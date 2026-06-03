@@ -1446,4 +1446,32 @@ public function profile()
         return response()->json(['success' => false, 'message' => 'Order reference not found.']);
     }
 
+    public function searchDevices(Request $request)
+    {
+        $query = $request->input('term');
+
+        if (empty($query) || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        // Search against model title
+        $models = DB::table('model')
+            ->where('title', 'LIKE', '%' . $query . '%')
+            ->select('title', 'sef_url', 'model_img')
+            ->limit(8)
+            ->get();
+
+        // Standardizing the response payload
+        $results = [];
+        foreach ($models as $model) {
+            $results[] = [
+                'title' => $model->title,
+                'url' => url('/sell-old-mobile-phone/used-' . $model->sef_url),
+                'image' => !empty($model->model_img) ? url('media/images/model/' . $model->model_img) : null
+            ];
+        }
+
+        return response()->json($results);
+    }
+
 }

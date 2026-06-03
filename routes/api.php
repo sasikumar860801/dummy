@@ -10,3 +10,4 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/get_price', [UserController::class, 'getPrice'])->name('get.price');
 Route::get('/view_summary/{order_id}', [UserController::class, 'view_summary'])->name('view_summary');
+Route::get('/search-devices', [UserController::class, 'searchDevices'])->name('api.search.devices');
