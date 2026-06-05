@@ -62,6 +62,16 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     Route::get('/orders', [AdminController::class, 'index'])->name('admin.orders');
     Route::post('/orders/update-status', [AdminController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::post('/orders/move-to-stock', [AdminController::class, 'moveToStock'])->name('admin.orders.moveToStock');
+
+    // here stock section 
+
+    Route::get('/stock', [AdminController::class, 'stock_index'])->name('admin.stock');
+    Route::post('/stock/store', [AdminController::class, 'store'])->name('admin.stock.store');
+    Route::post('/stock/update', [AdminController::class, 'update'])->name('admin.stock.update');
+    Route::post('/stock/delete', [AdminController::class, 'destroy'])->name('admin.stock.delete');
+    Route::post('/stock/update-assignment', [AdminController::class, 'updateAssignment'])->name('admin.stock.updateAssignment');
+    // Quick model catalog search utility endpoint for Select2 dropdown
+    Route::get('/api/search-models', [AdminController::class, 'searchModels']);
     
 });
 

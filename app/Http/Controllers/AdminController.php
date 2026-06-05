@@ -152,4 +152,146 @@ class AdminController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Asset inventory parameters securely provisioned inside global stock record sheets.']);
     }
+
+    public function stock_index()
+    {
+        // Live base query with product schema properties
+        $baseQuery = DB::table('stocks')
+            ->join('model', 'stocks.model_id', '=', 'model.id')
+            ->select('stocks.*', 'model.title as model_title', 'model.model_img');
+
+        // Segment collections according to your precise rules
+        $newStock = (clone $baseQuery)
+            ->where('stocks.status', 'pending')
+            ->where(function($q) { $q->whereNull('stocks.user_id')->orWhere('stocks.user_id', 0); })
+            ->where(function($q) { $q->whereNull('stocks.vendor_id')->orWhere('stocks.vendor_id', 0); })
+            ->orderBy('stocks.id', 'desc')->get();
+
+        $assignedStock = (clone $baseQuery)
+            ->where('stocks.status', 'pending')
+            ->whereNotNull('stocks.user_id')
+            ->where('stocks.user_id', '!=', 0)
+            ->where(function($q) { $q->whereNull('stocks.vendor_id')->orWhere('stocks.vendor_id', 0); })
+            ->orderBy('stocks.id', 'desc')->get();
+
+        $completedStock = (clone $baseQuery)
+            ->where('stocks.status', 'completed')
+            ->orderBy('stocks.id', 'desc')->get();
+
+        return view('admin.stock', compact('newStock', 'assignedStock', 'completedStock'));
+    }
+
+    public function searchModels(Request $request)
+    {
+        $term = $request->get('q');
+        $models = DB::table('model')
+            ->where('title', 'LIKE', '%' . $term . '%')
+            ->select('id', 'title as text')
+            ->limit(20)
+            ->get();
+            
+        return response()->json(['results' => $models]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required',
+            'model_id' => 'required',
+            'capacity' => 'required',
+            'buy_price' => 'required|numeric',
+            'color'    => 'required',
+            'imei_no_1'=> 'required',
+            'warranty' => 'required'
+        ]);
+
+        $buyPrice = (float)$request->input('buy_price');
+        $pUserPercent = (int)($request->input('profit_percent_user') ?? 20);
+        $profit = ($buyPrice * $pUserPercent) / 100;
+
+        DB::table('stocks')->insert([
+            'order_id'            => $request->input('order_id'),
+            'user_id'             => 0,
+            'vendor_id'           => 0,
+            'model_id'            => $request->input('model_id'),
+            'capacity'            => $request->input('capacity'),
+            'buy_price'           => $buyPrice,
+            'sell_price'          => 0.00,
+            'color'               => $request->input('color'),
+            'imei_no_1'           => $request->input('imei_no_1'),
+            'imei_no_2'           => $request->input('imei_no_2'),
+            'warranty'            => $request->input('warranty'),
+            'profit_percent_user' => $pUserPercent,
+            'profit_perc_vendor'  => (int)($request->input('profit_perc_vendor') ?? 5),
+            'profit'              => $profit,
+            'status'              => 'pending',
+            'payment_status'      => 'pending',
+            'purchase_date'       => Carbon::now()->toDateString(),
+            'created_at'          => Carbon::now(),
+            'updated_at'          => Carbon::now()
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Manual asset entry saved successfully.']);
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'capacity' => 'required',
+            'buy_price' => 'required|numeric',
+            'color' => 'required',
+            'imei_no_1' => 'required',
+            'warranty' => 'required'
+        ]);
+
+        $id = $request->input('id');
+        $buyPrice = (float)$request->input('buy_price');
+        $pUserPercent = (int)$request->input('profit_percent_user');
+        $profit = ($buyPrice * $pUserPercent) / 100;
+
+        DB::table('stocks')->where('id', $id)->update([
+            'capacity' => $request->input('capacity'),
+            'buy_price' => $buyPrice,
+            'color' => $request->input('color'),
+            'imei_no_1' => $request->input('imei_no_1'),
+            'imei_no_2' => $request->input('imei_no_2'),
+            'warranty' => $request->input('warranty'),
+            'profit_percent_user' => $pUserPercent,
+            'profit_perc_vendor' => (int)$request->input('profit_perc_vendor'),
+            'profit' => $profit,
+            'updated_at' => Carbon::now()
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Stock metadata updated successfully.']);
+    }
+
+    public function destroy(Request $request)
+    {
+        DB::table('stocks')->where('id', $request->input('id'))->delete();
+        return response()->json(['success' => true, 'message' => 'Stock item permanently purged from system logs.']);
+    }
+
+    public function updateAssignment(Request $request)
+    {
+        $id = $request->input('id');
+        $action = $request->input('action'); // 'unassign' or 'complete'
+
+        if ($action === 'unassign') {
+            DB::table('stocks')->where('id', $id)->update([
+                'user_id' => 0,
+                'vendor_id' => 0,
+                'updated_at' => Carbon::now()
+            ]);
+            return response()->json(['success' => true, 'message' => 'Asset unassigned and moved to New Stock.']);
+        } elseif ($action === 'complete') {
+            DB::table('stocks')->where('id', $id)->update([
+                'status' => 'completed',
+                'updated_at' => Carbon::now()
+            ]);
+            return response()->json(['success' => true, 'message' => 'Asset moved to Completed Storage pools.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Invalid structural route action execution request.'], 400);
+    }
 }
