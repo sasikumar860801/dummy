@@ -1,0 +1,187 @@
+http://127.0.0.1:8000/sell-old-mobile-phone/evaluate/poco-m4-pro/8gb128gb
+
+http://127.0.0.1:8000/sell-old-mobile-phone/used-poco-m4-pro
+
+
+next move to admin section 
+create table stocks
+id , order_id varchar ,user_id nullable ,vendor_id nullable, bidding json,  model_id , capacity , buy_price , sell_price , color , imei_no_1 , imei_no_2 ,warranty varchar,profit_percent_user int, profit_perc_vendor int, profit ,status varchar default pending , payment_status varchar default pending ,purchase_date ,created_at , updated_at
+need sql query
+
+
+here is the table structure 
+orders  table
+
+id BIGINT(20) UNSIGNED
+user_id BIGINT(20) UNSIGNED
+order_id VARCHAR(50)
+partial_order_item_id BIGINT(20) UNSIGNED
+model_id BIGINT(20) UNSIGNED
+name VARCHAR(255)
+mobile_no VARCHAR(20)
+alternate_mob_no VARCHAR(20)
+email VARCHAR(255)
+address_type VARCHAR(50)
+address TEXT
+landmark VARCHAR(255)
+state VARCHAR(100)
+pincode VARCHAR(20)
+payment_method VARCHAR(50)
+status VARCHAR(50)
+address_id BIGINT(20) UNSIGNED
+shipping_pickup_date DATE
+shipping_pickup_time VARCHAR(50)
+all_details LONGTEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
+
+order_items table
+
+id INT(11)
+access_token VARCHAR(255)
+model_series_id INT(11)
+model_id INT(11)
+user_id INT(11)
+order_id VARCHAR(50)
+order_item_id VARCHAR(255)
+item_name TEXT
+capacity VARCHAR(30)
+price VARCHAR(255)
+quantity VARCHAR(10)
+quantity_price VARCHAR(10)
+status VARCHAR(50)
+order_status VARCHAR(50)
+vendor_id INT(11)
+lead_source VARCHAR(50)
+created_at DATETIME
+updated_at DATETIME
+
+users table
+
+id INT(11)
+name VARCHAR(255)
+email VARCHAR(255)
+phone VARCHAR(20)
+alternate_mob_no VARCHAR(20)
+address TEXT
+landmark VARCHAR(255)
+state VARCHAR(100)
+pincode VARCHAR(10)
+status TINYINT(1)
+created_at TIMESTAMP
+updated_at TIMESTAMP
+
+table model 
+
+id - int(11)
+long_id - varchar(255)
+sef_url - varchar(255)
+title - varchar(255)
+meta_title - varchar(255)
+meta_desc - varchar(255)
+meta_keywords - varchar(255)
+meta_canonical_url - text
+cat_id - int(11)
+model_series_id - int(11)
+brand_id - int(11)
+price - float
+least_price - float
+least_price_add_sub - char(1)
+least_price_type - tinyint(4)
+capacity - longtext
+sell_price - float
+model_img - varchar(255)
+warranty - varchar(10)
+tooltip_device - text
+top_seller - tinyint(1)
+type - varchar(25)
+published - tinyint(1)
+cstm_group_id - varchar(10)
+ordering - int(11)
+created_date - timestamp
+upto_price - float
+upto_price_add_sub - varchar(5)
+upto_price_type - tinyint(1)
+searchable_words - text
+description - longtext
+custom_schema - text
+updated_at - timestamp
+
+first focus on order menu 
+
+there are four tabs horizontally with count each tab
+new order , reject orders , completed orders , cancelled orders  with count each tab
+involved table are already u well known order_items , orders , users  table are involved
+
+1st new order tab just asusal list of orders where condition orders.status = pending orderby id desc
+order id , date is created_at , 
+customer details 
+name , email , phone , alternate phone , address , landmark , state , pincode
+
+order details
+model name , model img , capacity , price , pickup_date and pickup_time 
+
+here three btn , view summary , complted bt , cancelled btn
+and one view summary btn and completed btn 
+view summary already u know when i click popup show details. 📋 Condition Assessment and ⚠️ Reported Issues / Conditions
+completed btn -> when i click btn just ask one confirmation and update status order.status and order_item.status to completed where order_id=$orderid
+cancelled btn -> when i click btn just ask one confirmation and update status order.status and order_item.status to cancelled where order_id=$orderid
+
+2 nd tab is reject just asusal list of orders where condition orders.status =reject
+same view , same data . 
+here two btn one is summary , cancelled btn
+asusual same functionality of summary and cancelled btn
+
+3rd tab is canclled just asusal list of orders where condition orders.status =cancelled
+same view , same data 
+here sinlge btn view summary thats all
+
+4th tab is completed just asusal list of orders where condition orders.status =completed
+same view , same data 
+here two btn one is view summary 
+and 2nd btn is move to stock (here one conditions check stocks table check same order_id is there or not if stock table order_id is present then not allow to move to stock so btn is non clickable  else allow to move to stock btn is enable)
+
+when i click move to stock btn theres popup open 
+
+order_id / auto fill
+model_id / auto fill and hide because no need to show in popup but payload add
+capacity / auto fill and hide 
+buy_price / order_item.price and editable
+color / input
+imei_no_1 / input
+imei_no_2 / input
+warranty / select dropdown 3 month 6 month 1 year , no warranty
+profit_percent_user / 20 and hide
+profit_perc_vendor / 5 and hide 
+
+then now stock section 
+
+theres an three tabs 
+new stock , assigned stock , completed stocks 
+
+1st new stock just asusal list of stocks where condition stocks.status = pending and user_id ==0 and vendor_id ==0
+not only list u can edit the stock particualar columns capacity , buy_price , color , imei_no_1 , imei_no_2 , warranty , profit_percent_user , profit_perc_vendor , 
+and delte btn u can delete too
+
+view is just model title , model img , capacity , buy_price , color , imei_no_1 , imei_no_2 , warranty ,.......etc
+
+2nd assigned stock 
+just asusal list of stocks where condition stocks.status = pending and user_id !=0 and vendor_id ==0
+not only list u can edit btn u canedit the stock particualar columns capacity , buy_price , color , imei_no_1 , imei_no_2 , warranty , profit_percent_user , profit_perc_vendor ,
+move to new stock btn u just move to new stock tab that means uppdate user_id ==0 and vendor_id ==0
+move to completed  btn u just move to completed stock tab that means uppdate stocks.status=completed
+
+
+3rd completed stocks 
+just asusal list of stocks where condition stocks.status = completed
+
+here one btn add stock
+top of the head theres on btn add stock to open the popup 
+so u can add stock manually just insert stocks table 
+here order_id is input 
+model_id is also input (select dropdown model.title use select 2 becasue easy to search model title) but store id not title
+capacity , input auto fill 8GB/128GB 
+buy_price is input
+color , imei_no_1 and imei_no_2 , warranty , profit_percent_user , profit_perc_vendor is input
+
+

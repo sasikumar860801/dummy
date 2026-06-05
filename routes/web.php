@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('home');
@@ -46,5 +46,23 @@ Route::get('/my-cart', [UserController::class, 'my_cart'])->name('my-cart');
 Route::get('/my-orders', [UserController::class, 'my_orders'])->name('my-orders');
 Route::post('/cancel-order', [UserController::class, 'cancel_order'])->name('cancel.order');
 
+Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
+
+// Protected Admin Routes Group
+Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+    
+    // Empty placeholders for the rest of your menus (to be built next)
+    Route::get('/orders', function() { return view('admin.orders'); })->name('admin.orders');
+    Route::get('/stock', function() { return view('admin.stock'); })->name('admin.stock');
+    Route::get('/models', function() { return view('admin.models'); })->name('admin.models');
+
+    Route::get('/orders', [AdminController::class, 'index'])->name('admin.orders');
+    Route::post('/orders/update-status', [AdminController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    Route::post('/orders/move-to-stock', [AdminController::class, 'moveToStock'])->name('admin.orders.moveToStock');
+    
+});
 
 // http://127.0.0.1:8000/sell-old-phone/sell-oneplus
