@@ -72,32 +72,63 @@ ordering - int(11)
 meta_canonical_url - text
 custom_schema - text
 
-Route::get('/sell-old-phone/{slug}', [UserController::class, 'model'])->name('model.all');
-slug means brand.title 
+orders 
 
-like that 
-http://127.0.0.1:8000/sell-old-phone/samsung
+id BIGINT(20) UNSIGNED
+user_id BIGINT(20) UNSIGNED
+order_id VARCHAR(50)
+partial_order_item_id BIGINT(20) UNSIGNED
+model_id BIGINT(20) UNSIGNED
+name VARCHAR(255)
+mobile_no VARCHAR(20)
+alternate_mob_no VARCHAR(20)
+email VARCHAR(255)
+address_type VARCHAR(50)
+address TEXT
+landmark VARCHAR(255)
+state VARCHAR(100)
+pincode VARCHAR(20)
+payment_method VARCHAR(50)
+status VARCHAR(50)
+address_id BIGINT(20) UNSIGNED
+shipping_pickup_date DATE
+shipping_pickup_time VARCHAR(50)
+all_details LONGTEXT
+created_at TIMESTAMP
+updated_at TIMESTAMP
 
-so u just fetch the data 
-first take the slug in this url its samsung right 
+order_items
 
-so check brand.title== samsung and get id so u got brand id
+id INT(11)
+access_token VARCHAR(255)
+model_series_id INT(11)
+model_id INT(11)
+user_id INT(11)
+order_id VARCHAR(50)
+order_item_id VARCHAR(255)
+item_name TEXT
+capacity VARCHAR(30)
+price VARCHAR(255)
+quantity VARCHAR(10)
+quantity_price VARCHAR(10)
+status VARCHAR(50)
+order_status VARCHAR(50)
+vendor_id INT(11)
+lead_source VARCHAR(50)
+created_at DATETIME
+updated_at DATETIME
 
-so fetch model data where brand_id = $brand_id and cat_id=83 static
+users
 
-so u got data right and compact send to view page / maintain same theme with hover with mobile responsive too and seo too
-
-view page 
-
-Search samsung model to sell text 
-below one text box search a model ( search ur samsnug model) / if u need write one more route api to fetch data 
-
-Choose by series
-default all button selected and model_series_id using this id u got title so list same inline if list is too long  then move to next line 
-like ALL , galaxy f series , galaxy m series ........
-if customer select m series only list m series only like filter thats all 
-
-choose model
-image below model.title 
-each linle total 5 model in laoptop view 
-
+id INT(11)
+name VARCHAR(255)
+email VARCHAR(255)
+phone VARCHAR(20)
+alternate_mob_no VARCHAR(20)
+address TEXT
+landmark VARCHAR(255)
+state VARCHAR(100)
+pincode VARCHAR(10)
+status TINYINT(1)
+created_at TIMESTAMP
+updated_at TIMESTAMP

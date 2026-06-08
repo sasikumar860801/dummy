@@ -294,4 +294,26 @@ class AdminController extends Controller
 
         return response()->json(['success' => false, 'message' => 'Invalid structural route action execution request.'], 400);
     }
+
+    public function all_refubrished_phones()
+    {
+        // Query live stocks and match with model data attributes
+        $products = DB::table('stocks')
+            ->join('model', 'stocks.model_id', '=', 'model.id')
+            ->select(
+                'stocks.id',
+                'stocks.buy_price',
+                'stocks.sell_price',
+                'stocks.warranty',
+                'stocks.capacity',
+                'model.title as model_title',
+                'model.model_img'
+            )
+            ->where('stocks.status', 'pending')
+            ->orderBy('stocks.buy_price', 'desc')
+            ->paginate(12); // Using pagination instead of get() for clean page loads
+
+        // Return view path containing payload collection
+        return view('refurbished_phones', compact('products'));
+    }
 }

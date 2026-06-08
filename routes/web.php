@@ -18,6 +18,7 @@ Route::get('/sell-old-tablet/sell-{brand}', [UserController::class, 'tablet_mode
 Route::get('/sell-old-tablet/sell-{slug}', [UserController::class, 'tablet_models'])->name('tablet.models');
 Route::get('/sell-old-mobile-phone/used-{slug}', [UserController::class, 'particular_model'])->name('particular_model');
 Route::get('/sell-old-mobile-phone/evaluate/{model_slug}/{variant_slug}', [UserController::class, 'evaluate_phone'])->name('evaluate_phone');
+    Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones']);
 
 Route::post('/send-otp', [UserController::class, 'sendOtp'])->name('send.otp');
 Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify.otp');
@@ -72,6 +73,7 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     Route::post('/stock/update-assignment', [AdminController::class, 'updateAssignment'])->name('admin.stock.updateAssignment');
     // Quick model catalog search utility endpoint for Select2 dropdown
     Route::get('/api/search-models', [AdminController::class, 'searchModels']);
+
     
 });
 
