@@ -4,11 +4,16 @@ http://127.0.0.1:8000/sell-old-mobile-phone/used-poco-m4-pro
 
 
 things to do 
-1.connect the link 
-2.buy view all products with seo  
+1.buy view all products with seo  
+2.connect the link 
 3.icon change for brand and attiributes 
 4.auto click verify otp 
 5.set session location 
 6.check all the seo like location all other page sell and buy page 
 7.overall test
 8.bug fixing
+
+  Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones']);
+    Route::get('/buy-refurbished-mobile-phones/buy-{slug}', [AdminController::class, 'buy_refubrished_phones']); // still wotn work
+    
+

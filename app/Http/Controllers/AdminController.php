@@ -155,6 +155,7 @@ class AdminController extends Controller
 
     public function stock_index()
     {
+        
         // Live base query with product schema properties
         $baseQuery = DB::table('stocks')
             ->join('model', 'stocks.model_id', '=', 'model.id')
@@ -193,21 +194,37 @@ class AdminController extends Controller
         return response()->json(['results' => $models]);
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $request->validate([
-            'order_id' => 'required',
-            'model_id' => 'required',
-            'capacity' => 'required',
-            'buy_price' => 'required|numeric',
-            'color'    => 'required',
-            'imei_no_1'=> 'required',
-            'warranty' => 'required'
+            'order_id'   => 'required',
+            'model_id'   => 'required',
+            'capacity'   => 'required',
+            'buy_price'  => 'required|numeric',
+            'color'      => 'required',
+            'imei_no_1'  => 'required',
+            'warranty'   => 'required',
+            'media.*'    => 'nullable|file|mimes:jpeg,jpg,png,webp,mp4,mov,avi|max:20480', // 20MB Max per file
+            'meta_title' => 'nullable|string|max:255',
         ]);
 
         $buyPrice = (float)$request->input('buy_price');
         $pUserPercent = (int)($request->input('profit_percent_user') ?? 20);
         $profit = ($buyPrice * $pUserPercent) / 100;
+
+        // Process File Media Stream Array Uploads
+        $mediaPaths = [];
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                if ($file->isValid()) {
+                    // Generate distinctive asset storage designation signature
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    // Move item straight to your custom destination directory paths layout
+                    $file->move(public_path('media/images/stock'), $filename);
+                    $mediaPaths[] = 'media/images/stock/' . $filename;
+                }
+            }
+        }
 
         DB::table('stocks')->insert([
             'order_id'            => $request->input('order_id'),
@@ -226,6 +243,18 @@ class AdminController extends Controller
             'profit'              => $profit,
             'status'              => 'pending',
             'payment_status'      => 'pending',
+            
+            // SEO & Structured Web Crawl Properties Mapping
+            'meta_title'          => $request->input('meta_title'),
+            'meta_description'    => $request->input('meta_description'),
+            'meta_keywords'       => $request->input('meta_keywords'),
+            'canonical_url'       => $request->input('canonical_url'),
+            'schema_data'         => $request->input('schema_data'),
+            'meta_robots'         => $request->input('meta_robots') ?? 'index, follow',
+            
+            // Dynamic Assets Storage String Array
+            'media'               => json_encode($mediaPaths),
+            
             'purchase_date'       => Carbon::now()->toDateString(),
             'created_at'          => Carbon::now(),
             'updated_at'          => Carbon::now()
@@ -233,16 +262,17 @@ class AdminController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Manual asset entry saved successfully.']);
     }
-
-    public function update(Request $request)
+    
+public function update(Request $request)
     {
         $request->validate([
-            'id' => 'required',
-            'capacity' => 'required',
-            'buy_price' => 'required|numeric',
-            'color' => 'required',
-            'imei_no_1' => 'required',
-            'warranty' => 'required'
+            'id'         => 'required',
+            'capacity'   => 'required',
+            'buy_price'  => 'required|numeric',
+            'color'      => 'required',
+            'imei_no_1'  => 'required',
+            'warranty'   => 'required',
+            'media.*'    => 'nullable|file|mimes:jpeg,jpg,png,webp,mp4,mov,avi|max:20480',
         ]);
 
         $id = $request->input('id');
@@ -250,17 +280,42 @@ class AdminController extends Controller
         $pUserPercent = (int)$request->input('profit_percent_user');
         $profit = ($buyPrice * $pUserPercent) / 100;
 
+        // Fetch existing asset dataset row record to safely preserve old media references
+        $currentStock = DB::table('stocks')->where('id', $id)->first();
+        $existingMedia = $currentStock && $currentStock->media ? json_decode($currentStock->media, true) : [];
+
+        // Append newly captured file uploads to the array loop structure
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                if ($file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('media/images/stock'), $filename);
+                    $existingMedia[] = 'media/images/stock/' . $filename;
+                }
+            }
+        }
+
         DB::table('stocks')->where('id', $id)->update([
-            'capacity' => $request->input('capacity'),
-            'buy_price' => $buyPrice,
-            'color' => $request->input('color'),
-            'imei_no_1' => $request->input('imei_no_1'),
-            'imei_no_2' => $request->input('imei_no_2'),
-            'warranty' => $request->input('warranty'),
+            'capacity'            => $request->input('capacity'),
+            'buy_price'           => $buyPrice,
+            'color'               => $request->input('color'),
+            'imei_no_1'           => $request->input('imei_no_1'),
+            'imei_no_2'           => $request->input('imei_no_2'),
+            'warranty'            => $request->input('warranty'),
             'profit_percent_user' => $pUserPercent,
-            'profit_perc_vendor' => (int)$request->input('profit_perc_vendor'),
-            'profit' => $profit,
-            'updated_at' => Carbon::now()
+            'profit_perc_vendor'  => (int)$request->input('profit_perc_vendor'),
+            'profit'              => $profit,
+            
+            // Updated SEO Metadata values
+            'meta_title'          => $request->input('meta_title'),
+            'meta_description'    => $request->input('meta_description'),
+            'meta_keywords'       => $request->input('meta_keywords'),
+            'canonical_url'       => $request->input('canonical_url'),
+            'schema_data'         => $request->input('schema_data'),
+            'meta_robots'         => $request->input('meta_robots'),
+            
+            'media'               => json_encode($existingMedia),
+            'updated_at'          => Carbon::now()
         ]);
 
         return response()->json(['success' => true, 'message' => 'Stock metadata updated successfully.']);
@@ -316,4 +371,79 @@ class AdminController extends Controller
         // Return view path containing payload collection
         return view('refurbished_phones', compact('products'));
     }
+
+    public function buy_refubrished_phones($slug)
+{
+    // 1. Fetch the primary stock item matching the model's SEF URL slug
+    $stock = DB::table('stocks')
+        ->join('model', 'stocks.model_id', '=', 'model.id')
+        ->select(
+            'stocks.*', 
+            'model.title as model_title', 
+            'model.model_img', 
+            'model.sef_url'
+        )
+        ->where('model.sef_url', $slug)
+        ->where('stocks.status', 'pending')
+        ->first();
+
+    if (!$stock) {
+        abort(404, 'Refurbished Device Not Found or Already Sold.');
+    }
+
+    // 2. Normalize and check model_img base path syntax
+    if (!empty($stock->model_img)) {
+        // If it doesn't contain a slash, it's just a raw filename; append your folder structure
+        if (!str_contains($stock->model_img, '/')) {
+            $stock->model_img = 'media/images/model/' . $stock->model_img;
+        }
+    }
+
+    // 3. Parse the custom stock media collection gallery
+    $mediaGallery = [];
+    if (!empty($stock->media)) {
+        $parsedMedia = is_string($stock->media) ? json_decode($stock->media, true) : $stock->media;
+        
+        // Loop through stock media array elements to fix their image paths if needed
+        foreach ($parsedMedia as $mediaPath) {
+            if (!empty($mediaPath)) {
+                if (!str_contains($mediaPath, '/')) {
+                    $mediaGallery[] = 'media/images/model/' . $mediaPath;
+                } else {
+                    $mediaGallery[] = $mediaPath;
+                }
+            }
+        }
+    }
+
+    // Force prepend the corrected model.model_img to be the absolute first element
+    if (!empty($stock->model_img)) {
+        array_unshift($mediaGallery, $stock->model_img);
+    }
+
+    // 4. Recommendation Engine ("You May Also Like")
+    $relatedStocks = DB::table('stocks')
+        ->join('model', 'stocks.model_id', '=', 'model.id')
+        ->select(
+            'stocks.*', 
+            'model.title as model_title', 
+            'model.model_img', 
+            'model.sef_url'
+        )
+        ->where('stocks.status', 'pending')
+        ->where('stocks.id', '!=', $stock->id)
+        ->inRandomOrder()
+        ->limit(4)
+        ->get();
+
+    // Map over related items to sanitize their individual model_img paths as well
+    foreach ($relatedStocks as $rel) {
+        if (!empty($rel->model_img) && !str_contains($rel->model_img, '/')) {
+            $rel->model_img = 'media/images/model/' . $rel->model_img;
+        }
+    }
+
+    return view('buy_product', compact('stock', 'mediaGallery', 'relatedStocks'));
+}
+
 }

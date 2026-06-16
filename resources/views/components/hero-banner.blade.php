@@ -18,9 +18,9 @@
                 <button class="hero-btn-primary" onclick="window.location.href='{{ url('/sell-old-phone') }}'">
                     Sell Now <span class="btn-arrow">→</span>
                 </button>
-                <button class="hero-btn-secondary">
+                                <a href="{{ route('all_refubrished_phones') }}" class="hero-btn-secondary">
                     Buy Now <span class="btn-arrow">→</span>
-                </button>
+                </a>
             </div>
         </div>
 

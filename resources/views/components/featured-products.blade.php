@@ -12,6 +12,7 @@
             'stocks.warranty',
             'stocks.capacity',
             'model.title as model_title',
+            'model.sef_url',
             'model.model_img'
         )
         ->where('stocks.status', 'pending')
@@ -28,7 +29,7 @@
                 <i class="fas fa-circle" style="color: #10b981; font-size: 8px; animation: pulse 1.5s infinite;"></i> Live Stock Track
             </span>
         </div>
-        <a href="#" style="color: #3b82f6; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#3b82f6'">
+        <a href="{{ route('all_refubrished_phones') }}" style="color: #3b82f6; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: color 0.2s;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#3b82f6'">
             View All <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
         </a>
     </div>
@@ -73,9 +74,11 @@
                                         <span class="ticker-badge"><i class="fas fa-shield-alt" style="font-size: 9px;"></i> {{ Str::before($product->warranty, ' ') }}</span>
                                     </div>
 
-                                    <button class="ticker-buy-btn">
-                                        Buy Now <i class="fas fa-shopping-cart" style="font-size: 11px;"></i>
-                                    </button>
+                                      <a href="{{ route('buy_refubrished_phones', ['slug' => $product->sef_url]) }}">
+                                            <button class="ticker-buy-btn">
+                                                Buyy Now <i class="fas fa-shopping-cart" style="font-size: 11px;"></i>
+                                            </button>
+                                        </a>
                                 </div>
                             </div>
                         @endforeach

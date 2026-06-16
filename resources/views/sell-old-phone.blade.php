@@ -86,9 +86,10 @@
                     @endif
                     
                     <!-- Sell Button -->
-                    <button class="sell-now-btn" data-model="{{ $model->title }}" style="margin-top: 15px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 8px 20px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.3s;">
+                                <a href="{{ route('particular_model', ['slug' => $model->sef_url]) }}"
+                    style="display:block; text-align:center; margin-top:15px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); color:white; padding:8px 20px; border-radius:30px; text-decoration:none; font-weight:600; cursor:pointer; width:100%; transition:all 0.3s;">
                         Sell Now
-                    </button>
+                    </a>
                 </div>
             </div>
             @endforeach

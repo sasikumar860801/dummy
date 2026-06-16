@@ -11,9 +11,9 @@
                         Buy Devices <i class="fas fa-angle-down"></i>
                     </a>
                     <div class="dropdown-content" style="position: absolute; top: 100%; left: 0; background: #1a1a2e; min-width: 180px; border-radius: 12px; padding: 8px 0; opacity: 0; visibility: hidden; transition: all 0.2s; border: 1px solid #2a2a3a; z-index: 1000; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);">
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Mobiles</a>
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Laptops</a>
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Tablets</a>
+                        <a href="{{ route('all_refubrished_phones') }}" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Mobiles</a>
+                        <a href="#" onclick="alert('Laptop buying service will be available soon. Stay tuned!'); return false;" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Laptops</a>
+                        <a href="#" onclick="alert('Tablet buying service will be available soon. Stay tuned!'); return false;" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Tablets</a>
                     </div>
                 </div>
                 
@@ -23,9 +23,9 @@
                         Sell Devices <i class="fas fa-angle-down"></i>
                     </a>
                     <div class="dropdown-content" style="position: absolute; top: 100%; left: 0; background: #1a1a2e; min-width: 180px; border-radius: 12px; padding: 8px 0; opacity: 0; visibility: hidden; transition: all 0.2s; border: 1px solid #2a2a3a; z-index: 1000; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);">
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Mobile</a>
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Laptop</a>
-                        <a href="#" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Tablet</a>
+                        <a href="{{ route('brands.all') }}" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Mobile</a>
+                        <a href="#" onclick="alert('Laptop selling service will be available soon. Stay tuned!'); return false;"style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Laptop</a>
+                        <a href="{{ route('tablet.brands') }}" style="display: block; padding: 10px 20px; color: #cbd5e1; text-decoration: none; font-size: 13px;">Sell Tablet</a>
                     </div>
                 </div>
                 

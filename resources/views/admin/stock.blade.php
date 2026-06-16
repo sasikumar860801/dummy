@@ -38,7 +38,17 @@
     /* Structured Custom Form Row CSS Frameworks */
     .input-form-row { margin-bottom: 16px; text-align: left; }
     .input-form-row label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
-    .input-form-row input, .input-form-row select { width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; outline: none; font-size: 14px; box-sizing: border-box; }
+    .input-form-row input, .input-form-row select, .input-form-row textarea { width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 10px; color: white; outline: none; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+    .input-form-row textarea { resize: vertical; min-height: 70px; }
+
+    /* SEO Section Styling Accordion Blueprint */
+    .seo-optimization-container { background: rgba(30, 30, 45, 0.3); border: 1px dashed #2a2a3a; padding: 20px; border-radius: 16px; margin-top: 15px; }
+    .preview-thumbnail-strip { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .preview-media-thumb { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #3b82f6; background: #050508; position: relative; }
+    
+    /* Plus Block Custom Styling */
+    .dynamic-media-adder-box { width: 65px; height: 65px; border: 2px dashed #4b5563; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; transition: 0.2s; background: #141424; }
+    .dynamic-media-adder-box:hover { border-color: #ec4899; color: #ec4899; }
 </style>
 @endpush
 
@@ -78,12 +88,12 @@
 </div>
 
 <div id="addStockModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5,5,8,0.85); backdrop-filter: blur(8px); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #111118; border: 1px solid #2a2a3a; width: 100%; max-width: 550px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+    <div style="background: #111118; border: 1px solid #2a2a3a; width: 100%; max-width: 600px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="padding: 20px 24px; border-bottom: 1px solid #1e1e2a; display: flex; align-items: center; justify-content: space-between;">
             <h4 style="color: white; font-size: 18px; font-weight: 600; margin: 0;"><i class="fas fa-plus" style="color: #ec4899; margin-right: 8px;"></i> Onboard System Hardware Asset</h4>
             <button onclick="closeModalWindow('addStockModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
-        <form id="addStockForm">
+        <form id="addStockForm" enctype="multipart/form-data">
             @csrf
             <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -139,6 +149,58 @@
                         <input type="number" name="profit_perc_vendor" value="5" required>
                     </div>
                 </div>
+
+                <div class="input-form-row" style="margin-top: 10px;">
+                    <label style="color: #ec4899; font-weight: 600;"><i class="fas fa-images"></i> Attach Product Media Gallery</label>
+                    
+                    <div id="add_modal_input_container" style="display: none;"></div>
+                    
+                    <div class="preview-thumbnail-strip" style="align-items: center;">
+                        <div id="add_modal_visual_preview_strip" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                        <div class="dynamic-media-adder-box" onclick="triggerDynamicFileInput('add')">
+                            <i class="fas fa-plus" style="font-size: 20px;"></i>
+                        </div>
+                    </div>
+                    <small style="color: #64748b; font-size: 11px; margin-top: 6px; display: block;">Click the plus container to queue separate images or operational video clips seamlessly.</small>
+                </div>
+
+                <div class="seo-optimization-container">
+                    <h5 style="color: white; margin: 0 0 15px 0; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-globe-americas" style="color: #3b82f6;"></i> B2C Storefront Buying-Intent SEO Metadata
+                    </h5>
+                    <div class="input-form-row">
+                        <label>Meta Title</label>
+                        <input type="text" name="meta_title" placeholder="Buy Refurbished Model Name...">
+                    </div>
+                    <div class="input-form-row">
+                        <label>Meta Description</label>
+                        <textarea name="meta_description" placeholder="Write a catchy meta snippet for search results..."></textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-form-row">
+                            <label>Meta Keywords</label>
+                            <input type="text" name="meta_keywords" placeholder="used phone, second hand device">
+                        </div>
+                        <div class="input-form-row">
+                            <label>Canonical Destination URL</label>
+                            <input type="url" name="canonical_url" placeholder="https://site.in/product-slug">
+                        </div>
+                    </div>
+                    <div class="input-form-row">
+                        <label>Microdata Product Schema Script (`ld+json` Text Format)</label>
+                      <textarea name="schema_data"
+                            placeholder='{"@@context":"https://schema.org","@@type":"Product","name":"Device"}'>
+                            </textarea>
+                    </div>
+                    <div class="input-form-row">
+                        <label>Robots Index Rules Framework</label>
+                        <select name="meta_robots">
+                            <option value="index, follow" selected>index, follow (Standard Public visibility Link)</option>
+                            <option value="noindex, follow">noindex, follow (Hide on search results engines)</option>
+                        </select>
+                    </div>
+                </div>
+
             </div>
             <div style="padding: 16px 24px; background: #0f0f15; border-top: 1px solid #1e1e2a; display: flex; justify-content: flex-end; gap: 12px;">
                 <button type="button" class="action-control-btn" style="background: #1a1a2e; color: white;" onclick="closeModalWindow('addStockModal')">Abort</button>
@@ -149,12 +211,12 @@
 </div>
 
 <div id="editStockModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5,5,8,0.85); backdrop-filter: blur(8px); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
-    <div style="background: #111118; border: 1px solid #2a2a3a; width: 100%; max-width: 550px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+    <div style="background: #111118; border: 1px solid #2a2a3a; width: 100%; max-width: 600px; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
         <div style="padding: 20px 24px; border-bottom: 1px solid #1e1e2a; display: flex; align-items: center; justify-content: space-between;">
             <h4 style="color: white; font-size: 18px; font-weight: 600; margin: 0;"><i class="fas fa-edit" style="color: #3b82f6; margin-right: 8px;"></i> Edit Stock Inventory Specifications</h4>
             <button onclick="closeModalWindow('editStockModal')" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
-        <form id="editStockForm">
+        <form id="editStockForm" enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="edit_stock_id" name="id">
             <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
@@ -201,6 +263,60 @@
                         <input type="number" id="edit_profit_perc_vendor" name="profit_perc_vendor" required>
                     </div>
                 </div>
+
+                <div class="input-form-row" style="margin-top: 10px;">
+                    <label style="color: #3b82f6; font-weight: 600;"><i class="fas fa-cloud-upload-alt"></i> Append New Media Files</label>
+                    
+                    <div id="edit_modal_input_container" style="display: none;"></div>
+                    
+                    <div class="preview-thumbnail-strip" style="align-items: center; margin-bottom: 15px;">
+                        <div id="edit_modal_new_preview_strip" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                        <div class="dynamic-media-adder-box" onclick="triggerDynamicFileInput('edit')">
+                            <i class="fas fa-plus" style="font-size: 20px;"></i>
+                        </div>
+                    </div>
+
+                    <div id="edit_media_preview_wrapper" style="display:none; border-top: 1px solid #2a2a3a; padding-top: 12px;">
+                        <label style="font-size:11px; margin-top:8px; color:#64748b; display: block;">Active Catalog Live Media Gallery Content:</label>
+                        <div class="preview-thumbnail-strip" id="edit_media_preview_strip"></div>
+                    </div>
+                </div>
+
+                <div class="seo-optimization-container">
+                    <h5 style="color: white; margin: 0 0 15px 0; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-globe-americas" style="color: #3b82f6;"></i> Update Storefront Buying-Intent SEO Metadata
+                    </h5>
+                    <div class="input-form-row">
+                        <label>Meta Title</label>
+                        <input type="text" id="edit_meta_title" name="meta_title">
+                    </div>
+                    <div class="input-form-row">
+                        <label>Meta Description</label>
+                        <textarea id="edit_meta_description" name="meta_description"></textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-form-row">
+                            <label>Meta Keywords</label>
+                            <input type="text" id="edit_meta_keywords" name="meta_keywords">
+                        </div>
+                        <div class="input-form-row">
+                            <label>Canonical Destination URL</label>
+                            <input type="url" id="edit_canonical_url" name="canonical_url">
+                        </div>
+                    </div>
+                    <div class="input-form-row">
+                        <label>Microdata Product Schema Script (`ld+json` Layout Format)</label>
+                        <textarea id="edit_schema_data" name="schema_data"></textarea>
+                    </div>
+                    <div class="input-form-row">
+                        <label>Robots Index Rules Framework</label>
+                        <select id="edit_meta_robots" name="meta_robots">
+                            <option value="index, follow">index, follow (Standard Public visibility Link)</option>
+                            <option value="noindex, follow">noindex, follow (Hide on search results engines)</option>
+                        </select>
+                    </div>
+                </div>
+
             </div>
             <div style="padding: 16px 24px; background: #0f0f15; border-top: 1px solid #1e1e2a; display: flex; justify-content: flex-end; gap: 12px;">
                 <button type="button" class="action-control-btn" style="background: #1a1a2e; color: white;" onclick="closeModalWindow('editStockModal')">Cancel</button>
@@ -214,35 +330,25 @@
 @push('admin-scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    // Tab switching architecture engine fix
     function switchContextTab(event, tabId) {
-        // Hide all template tab blocks explicitly
         $('.tab-view-panel').removeClass('active').hide();
         $('.tab-trigger-btn').removeClass('active');
-        
-        // Show matching content element
         $('#' + tabId).addClass('active').show();
         $(event.currentTarget).addClass('active');
     }
 
-    // Modal popup triggers
     function openModalWindow(modalId) { 
         $('#' + modalId).css('display', 'flex'); 
         
         if(modalId === 'addStockModal') {
-            // Re-mount the catalog lookup autocomplete select2 tool safely inside container
             $('#model_search_dropdown').select2({
                 dropdownParent: $('#addStockModal'),
                 ajax: {
                     url: '/admin/api/search-models',
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) {
-                        return { q: params.term };
-                    },
-                    processResults: function (data) { 
-                        return { results: data.results }; 
-                    },
+                    data: function (params) { return { q: params.term }; },
+                    processResults: function (data) { return { results: data.results }; },
                     cache: true
                 },
                 placeholder: 'Type to query device database name...',
@@ -255,8 +361,65 @@
         $('#' + modalId).css('display', 'none'); 
     }
 
-    // Mount properties safely inside javascript modal layout
+    // Dynamic Multi-File Appender Script Hook
+    function triggerDynamicFileInput(context) {
+        var inputContainer = $('#' + context + '_modal_input_container');
+        var previewStrip = $('#' + context + '_modal_' + (context === 'add' ? 'visual_' : 'new_') + 'preview_strip');
+        
+        // Generate isolated index identifier
+        var uniqueId = 'file_' + context + '_' + Date.now();
+        
+        // Append input file field container 
+        var fileInputHtml = `<input type="file" name="media[]" id="${uniqueId}" accept="image/*,video/*">`;
+        inputContainer.append(fileInputHtml);
+        
+        var targetInput = $('#' + uniqueId);
+        
+        // Listen for data stream select attachment change
+        targetInput.on('change', function() {
+            if (this.files && this.files[0]) {
+                var file = this.files[0];
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    var previewHtml = '';
+                    if (file.type.match('video.*')) {
+                        previewHtml = `
+                            <div style="position:relative;" id="wrapper_${uniqueId}">
+                                <video src="${e.target.result}" class="preview-media-thumb" muted></video>
+                                <span onclick="removeQueuedFile('${uniqueId}')" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold;">&times;</span>
+                            </div>`;
+                    } else {
+                        previewHtml = `
+                            <div style="position:relative;" id="wrapper_${uniqueId}">
+                                <img src="${e.target.result}" class="preview-media-thumb">
+                                <span onclick="removeQueuedFile('${uniqueId}')" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold;">&times;</span>
+                            </div>`;
+                    }
+                    previewStrip.append(previewHtml);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                targetInput.remove();
+            }
+        });
+        
+        // Open file selector view window
+        targetInput.click();
+    }
+
+    function removeQueuedFile(inputId) {
+        $('#' + inputId).remove();
+        $('#wrapper_' + inputId).remove();
+    }
+
+    // Remount dataset properties into edit form layouts natively
     function launchEditModal(dataset) {
+        console.log(dataset);
+        // Empty old entries queued up dynamically on previous open
+        $('#edit_modal_input_container').empty();
+        $('#edit_modal_new_preview_strip').empty();
+
         $('#edit_stock_id').val(dataset.id);
         $('#edit_capacity').val(dataset.capacity);
         $('#edit_buy_price').val(dataset.buy_price);
@@ -266,16 +429,47 @@
         $('#edit_warranty').val(dataset.warranty);
         $('#edit_profit_percent_user').val(dataset.profit_percent_user);
         $('#edit_profit_perc_vendor').val(dataset.profit_perc_vendor);
+        
+        // Feed text elements fields safely & clear out undefined elements
+        $('#edit_meta_title').val(dataset.meta_title || '');
+        $('#edit_meta_description').val(dataset.meta_description || '');
+        $('#edit_meta_keywords').val(dataset.meta_keywords || '');
+        $('#edit_canonical_url').val(dataset.canonical_url || '');
+        $('#edit_schema_data').val(dataset.schema_data || '');
+        if(dataset.meta_robots) { $('#edit_meta_robots').val(dataset.meta_robots); }
+
+        // Render live uploaded file loops previews inside edit window frame structures
+        var previewStrip = $('#edit_media_preview_strip').empty();
+        if(dataset.media) {
+            try {
+                var filesArray = typeof dataset.media === 'string' ? JSON.parse(dataset.media) : dataset.media;
+                if(filesArray && filesArray.length > 0) {
+                    $('#edit_media_preview_wrapper').show();
+                    filesArray.forEach(function(path) {
+                        if(path.match(/\.(mp4|webm|avi|mov)$/i)) {
+                            previewStrip.append(`<video src="/${path}" class="preview-media-thumb" muted></video>`);
+                        } else {
+                            previewStrip.append(`<img src="/${path}" class="preview-media-thumb">`);
+                        }
+                    });
+                } else { $('#edit_media_preview_wrapper').hide(); }
+            } catch(e) { $('#edit_media_preview_wrapper').hide(); }
+        } else { $('#edit_media_preview_wrapper').hide(); }
+
         openModalWindow('editStockModal');
     }
 
-    // Process Form Requests via Core AJAX Operations
+    // Process Form Requests using native JavaScript FormData interfaces
     $('#addStockForm').on('submit', function(e) {
         e.preventDefault();
+        var formDataPayload = new FormData(this);
+
         $.ajax({
             url: "{{ route('admin.stock.store') }}",
             method: "POST",
-            data: $(this).serialize(),
+            data: formDataPayload,
+            processData: false, 
+            contentType: false, 
             success: function(res) { 
                 if(res.success) { 
                     alert(res.message); 
@@ -288,10 +482,14 @@
 
     $('#editStockForm').on('submit', function(e) {
         e.preventDefault();
+        var formDataPayload = new FormData(this);
+
         $.ajax({
             url: "{{ route('admin.stock.update') }}",
             method: "POST",
-            data: $(this).serialize(),
+            data: formDataPayload,
+            processData: false,
+            contentType: false,
             success: function(res) { 
                 if(res.success) { 
                     alert(res.message); 
@@ -308,12 +506,7 @@
             url: "{{ route('admin.stock.delete') }}",
             method: "POST",
             data: { _token: "{{ csrf_token() }}", id: id },
-            success: function(res) { 
-                if(res.success) { 
-                    alert(res.message); 
-                    window.location.reload(); 
-                } 
-            }
+            success: function(res) { if(res.success) { alert(res.message); window.location.reload(); } }
         });
     }
 
@@ -323,16 +516,10 @@
             url: "{{ route('admin.stock.updateAssignment') }}",
             method: "POST",
             data: { _token: "{{ csrf_token() }}", id: id, action: actionType },
-            success: function(res) { 
-                if(res.success) { 
-                    alert(res.message); 
-                    window.location.reload(); 
-                } 
-            }
+            success: function(res) { if(res.success) { alert(res.message); window.location.reload(); } }
         });
     }
 
-    // Run tab configuration defaults inside document on page load
     $(document).ready(function() {
         $('.tab-view-panel').hide();
         $('.tab-view-panel.active').show();

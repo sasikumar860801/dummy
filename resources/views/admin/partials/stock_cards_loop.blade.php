@@ -44,10 +44,25 @@
                 @if($tab === 'new')
                     <button class="action-control-btn" style="background: #1a1a2e; color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);" 
                             onclick="launchEditModal({
-                                id: '{{ $item->id }}', capacity: '{{ $item->capacity }}', buy_price: '{{ $item->buy_price }}', 
-                                color: '{{ $item->color }}', imei_no_1: '{{ $item->imei_no_1 }}', imei_no_2: '{{ $item->imei_no_2 }}', 
-                                warranty: '{{ $item->warranty }}', profit_percent_user: '{{ $item->profit_percent_user }}', profit_perc_vendor: '{{ $item->profit_perc_vendor }}'
-                            })">
+                        id: '{{ $item->id }}',
+                        capacity: '{{ $item->capacity }}',
+                        buy_price: '{{ $item->buy_price }}',
+                        color: '{{ $item->color }}',
+                        imei_no_1: '{{ $item->imei_no_1 }}',
+                        imei_no_2: '{{ $item->imei_no_2 }}',
+                        warranty: '{{ $item->warranty }}',
+                        profit_percent_user: '{{ $item->profit_percent_user }}',
+                        profit_perc_vendor: '{{ $item->profit_perc_vendor }}',
+
+                        meta_title: '{{ $item->meta_title }}',
+                        meta_description: '{{ $item->meta_description }}',
+                        meta_keywords: '{{ $item->meta_keywords }}',
+                        canonical_url: '{{ $item->canonical_url }}',
+                        schema_data: '{{ $item->schema_data }}',
+                        meta_robots: '{{ $item->meta_robots }}',
+                        media: '{{ $item->media }}',
+
+                    })">
                         <i class="fas fa-edit"></i> Edit Properties
                     </button>
                     <button class="action-control-btn" style="background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.15);" onclick="fireDeleteAction('{{ $item->id }}')">
@@ -58,10 +73,24 @@
                 @if($tab === 'assigned')
                     <button class="action-control-btn" style="background: #1a1a2e; color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);" 
                             onclick="launchEditModal({
-                                id: '{{ $item->id }}', capacity: '{{ $item->capacity }}', buy_price: '{{ $item->buy_price }}', 
-                                color: '{{ $item->color }}', imei_no_1: '{{ $item->imei_no_1 }}', imei_no_2: '{{ $item->imei_no_2 }}', 
-                                warranty: '{{ $item->warranty }}', profit_percent_user: '{{ $item->profit_percent_user }}', profit_perc_vendor: '{{ $item->profit_perc_vendor }}'
-                            })">
+                        id: '{{ $item->id }}',
+                        capacity: '{{ $item->capacity }}',
+                        buy_price: '{{ $item->buy_price }}',
+                        color: '{{ $item->color }}',
+                        imei_no_1: '{{ $item->imei_no_1 }}',
+                        imei_no_2: '{{ $item->imei_no_2 }}',
+                        warranty: '{{ $item->warranty }}',
+                        profit_percent_user: '{{ $item->profit_percent_user }}',
+                        profit_perc_vendor: '{{ $item->profit_perc_vendor }}',
+
+                        meta_title: '{{ $item->meta_title }}',
+                        meta_description: '{{ $item->meta_description }}',
+                        meta_keywords: '{{ $item->meta_keywords }}',
+                        canonical_url: '{{ $item->canonical_url }}',
+                        schema_data: '{{ $item->schema_data }}',
+                        meta_robots: '{{ $item->meta_robots }}'
+
+                    })">
                         <i class="fas fa-edit"></i> Edit Properties
                     </button>
                     <button class="action-control-btn" style="background: linear-gradient(135deg, #eab308, #ca8a04); color: black;" onclick="fireAssignmentAction('{{ $item->id }}', 'unassign')">

@@ -180,6 +180,7 @@ class UserController extends Controller
 
 public function tablet_models($slug)
 {
+    
     // Remove 'sell-' prefix from slug if present
     $cleanSlug = str_replace('sell-', '', $slug);
     
@@ -206,7 +207,8 @@ public function tablet_models($slug)
         $model->model_img_url = $model->model_img 
             ? asset('media/images/model/' . $model->model_img)
             : asset('media/images/model/default-model.webp');
-    }
+    }    
+
     
     // Get unique model_series_id from the fetched models
     $modelSeriesIds = $models->pluck('model_series_id')->unique()->filter()->toArray();

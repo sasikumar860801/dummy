@@ -95,9 +95,11 @@
                     @endif
                     
                     <!-- Sell Button -->
-                    <button class="sell-now-btn" data-model="{{ $model->title }}" data-brand="{{ $brand->title }}" style="margin-top: 15px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 10px 20px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.3s;">
+                                <a href="{{ route('particular_model', ['slug' => $model->sef_url]) }}"
+                    class="sell-now-btn"
+                    style="display:block; text-align:center; margin-top:15px; background:linear-gradient(135deg,#3b82f6,#8b5cf6); color:white; padding:10px 20px; border-radius:30px; font-weight:600; cursor:pointer; width:100%; text-decoration:none; transition:all 0.3s;">
                         Sell Now
-                    </button>
+                    </a>
                 </div>
             </div>
             @endforeach
@@ -250,7 +252,6 @@
             e.stopPropagation();
             const modelName = this.getAttribute('data-model');
             const brandName = this.getAttribute('data-brand');
-            alert(`Sell ${brandName} ${modelName}\n\nThis will open the selling form. You'll get best price with free doorstep pickup!`);
             // window.location.href = `/sell/${brandName.toLowerCase()}/${modelName.toLowerCase().replace(/\s+/g, '-')}`;
         });
     });

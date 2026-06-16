@@ -9,16 +9,19 @@ Route::get('/', function () {
     return view('home');
 });
 
+
 Route::get('/sell-old-phone', [UserController::class, 'allBrands'])->name('brands.all');
 Route::get('/sell-old-phone/{slug}', [UserController::class, 'model'])->name('model.all');
 Route::get('/search-models', [UserController::class, 'searchModels'])->name('search.models');
 Route::get('/api/search-models', [UserController::class, 'searchModels'])->name('api.search.models');
 Route::get('/sell-old-tablet', [UserController::class, 'tablet_brands'])->name('tablet.brands');
 Route::get('/sell-old-tablet/sell-{brand}', [UserController::class, 'tablet_models'])->name('tablet.models');
-Route::get('/sell-old-tablet/sell-{slug}', [UserController::class, 'tablet_models'])->name('tablet.models');
+Route::get('/sell-old-tablet/sell-{slug}', [UserController::class, 'tablet_models'])->name('tablet_models');// need to working on it 
 Route::get('/sell-old-mobile-phone/used-{slug}', [UserController::class, 'particular_model'])->name('particular_model');
 Route::get('/sell-old-mobile-phone/evaluate/{model_slug}/{variant_slug}', [UserController::class, 'evaluate_phone'])->name('evaluate_phone');
-    Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones']);
+    Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones'])->name('all_refubrished_phones');
+    Route::get('/buy-refurbished-mobile-phones/buy-{slug}', [AdminController::class, 'buy_refubrished_phones'])->name('buy_refubrished_phones'); // still wotn work
+    
 
 Route::post('/send-otp', [UserController::class, 'sendOtp'])->name('send.otp');
 Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify.otp');
