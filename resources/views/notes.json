@@ -15,5 +15,49 @@ things to do
 
   Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones']);
     Route::get('/buy-refurbished-mobile-phones/buy-{slug}', [AdminController::class, 'buy_refubrished_phones']); // still wotn work
-    
 
+
+
+no spot / 202512271006362312.png
+Minor Spot / 202512271032061609.png
+Major Spot or Line on Display / 202512271032068809.png
+No scratch or crack / 202512271032065913.png
+Minor Scratches or less than 2 scratches / 202512271032067254.png
+Heavy Scratches / 2025122710320691.png
+Screen Cracked or Glass Broken / 202601051435183878.png
+No defects on back panel / 202512271032069878.png
+Minor Scratches or less than 2 scratches / 202512271032061518.png
+Heavy Scratches/ 202512271032068461.png
+Back Panel broken / 202512271032062476.png
+No defects on center panel / 202512271032063783.png
+Minor dent or scratches / 202512271032068349.png
+Major dent or heavy scratches / 202512271032064070.png
+Center panel cracked or buttons missing or bent pa... / 20251227103206986.png
+Battery Health is 83% & below 83% / 20251227103206698.png
+Front Camera not working / 202512271032067732.png
+Back Camera not working / 202512271032064399.png
+Camera Glass Broken / 202512271032061038.png
+Network problem / 202512271032067821.png
+Speaker not working / 202512271032065134.png
+Mic not working / 202512271037443320.png
+Touch Id or Face Id not working / 202512271143099008.png
+Volume Button not working / 202512271147204448.png
+WiFi or Bluetooth not working / 202512271147206932.png
+Charging Port not working / 202512271204353458.png
+Proximity Sensor not working / 202512271204356127.png
+Power button not working /202512271204359535.png
+Ear Speaker not working or low /202512271204353290.png
+Vibrator not working / 202512271204355292.png
+Battery Changed / 202512271204358526.png
+Sim Tray Missing / 202512271204356264.png
+Original Charger of Device /202512271204359386.png
+Box with same IMEI / 202512271204355897.png / 20251227120435386.png
+Bill with same IMEI
+Purchase date below 2 months
+Purchase date between 2 to 6 months
+Purchase date between 6 to 11 months
+Above 11 months
+Dual e sim / dual-sim-card.webp
+
+
+C:\xampp\htdocs\project\dummy\public\media\images\custom_fields

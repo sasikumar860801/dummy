@@ -374,6 +374,7 @@ public function update(Request $request)
 
     public function buy_refubrished_phones($slug)
 {
+    
     // 1. Fetch the primary stock item matching the model's SEF URL slug
     $stock = DB::table('stocks')
         ->join('model', 'stocks.model_id', '=', 'model.id')
