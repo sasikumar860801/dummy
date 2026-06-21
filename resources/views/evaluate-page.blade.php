@@ -387,8 +387,8 @@
         }
         
         .attribute-card img {
-            width: 40px;
-            height: 40px;
+            width: 80px;
+            height: 80px;
         }
         
         .attribute-card .attribute-label {
@@ -406,8 +406,8 @@
         }
         
         .attribute-card img {
-            width: 35px;
-            height: 35px;
+            width: 60px;
+            height: 60px;
         }
     }
     
