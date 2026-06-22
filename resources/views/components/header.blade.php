@@ -1,8 +1,9 @@
+
 @php
     $isLoggedIn = Session::has('user_id');
     $userName = Session::get('user_name', '');
 @endphp
-
+  
 <header style="position: relative; background: #0f0f15; border-bottom: 1px solid #1e1e2a; top: 0; z-index: 9999; backdrop-filter: blur(10px); width: 100%; overflow: visible;">
     <div class="container" style="max-width: 1280px; margin: 0 auto; padding: 0 20px; width: 100%; overflow: visible;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; padding: 16px 0; overflow: visible;">
@@ -52,11 +53,10 @@
             </div>
         </div>
     </div>
-</div>
+</header>
 
-<div id="loginPopup" class="login-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 8, 0.85); z-index: 99999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
-    
-<div style="background: #111118; border-radius: 24px; padding: 40px; max-width: 400px; width: 90%; border: 1px solid #2a2a3a; position: relative; z-index: 100000;">
+<div id="loginPopup" class="login-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 8, 0.85); z-index: 99999; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+    <div style="background: #111118; border-radius: 24px; padding: 40px; max-width: 400px; width: 90%; border: 1px solid #2a2a3a; position: relative; z-index: 100000;">
         <button id="closePopup" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
         
         <div id="phoneStep" style="text-align: center;">
@@ -74,10 +74,10 @@
             <h3 style="color: white; margin-bottom: 10px;">Enter OTP</h3>
             <p style="color: #94a3b8; margin-bottom: 25px; font-size: 14px;">We've sent a 4-digit code to <span id="displayPhone"></span></p>
             <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
-                <input type="text" id="otp1" maxlength="1" class="otp-input" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
-                <input type="text" id="otp2" maxlength="1" class="otp-input" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
-                <input type="text" id="otp3" maxlength="1" class="otp-input" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
-                <input type="text" id="otp4" maxlength="1" class="otp-input" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
+                <input type="password" id="otp1" maxlength="1" class="otp-input" inputmode="numeric" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
+                <input type="password" id="otp2" maxlength="1" class="otp-input" inputmode="numeric" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
+                <input type="password" id="otp3" maxlength="1" class="otp-input" inputmode="numeric" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
+                <input type="password" id="otp4" maxlength="1" class="otp-input" inputmode="numeric" style="width: 50px; height: 50px; text-align: center; font-size: 20px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white;">
             </div>
             <div id="otpError" style="color: #ef4444; font-size: 12px; margin-bottom: 15px; display: none;"></div>
             <button id="verifyOtpBtn" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;">Verify OTP</button>
@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Debounce delays processing to prevent flooding your DB queries
         searchTimeout = setTimeout(function() {
             $.ajax({
                 url: "{{ route('api.search.devices') }}",
@@ -163,14 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
 
-    // Close search dropdown list layout window frame automatically if clicked outside panel boundaries
     $(document).on('click', function(e) {
         if (!$(e.target).closest('#searchContainer').length) {
             $searchDropdown.hide();
         }
     });
 
-    // Reopen dropdown list context panel if focus shifts back into search box
     $searchInput.on('focus', function() {
         if ($(this).val().trim().length >= 2 && $searchDropdown.children().length > 0) {
             $searchDropdown.show();
@@ -250,6 +247,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('otp2').value = otpStr[1] || '';
                         document.getElementById('otp3').value = otpStr[2] || '';
                         document.getElementById('otp4').value = otpStr[3] || '';
+
+                        // NEW CORRECTION: Automatically click verify button after exactly 3 seconds if OTP is loaded
+                        setTimeout(() => {
+                            if (getOtpValue().length === 4) {
+                                verifyOtpBtn.click();
+                            }
+                        }, 3000);
                     }
                 } else {
                     mobileError.textContent = data.message || 'Failed to send OTP';
@@ -286,10 +290,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 const data = await response.json();
-                if (data.success) {
-                    loginPopup.style.display = 'none';
-                    window.location.reload(); // Safer layout reload to clear variables across blade wrappers
-                } else {
+             if (data.success) {
+                loginPopup.style.display = 'none';
+
+                document.getElementById('userSection').innerHTML = `
+                    <div class="user-dropdown" style="position: relative; z-index: 10000;">
+                        <button class="user-btn" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 8px 20px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${data.user.name}</span>
+                            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+else {
                     otpError.textContent = data.message || 'Invalid OTP';
                     otpError.style.display = 'block';
                 }
@@ -314,10 +329,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const otpInputs = document.querySelectorAll('.otp-input');
     otpInputs.forEach((input, index) => {
         input.addEventListener('input', function() {
-            if (this.value.length === 1 && index < 3) { otpInputs[index + 1].focus(); }
+            if (this.value.length === 1 && index < 3) { 
+                otpInputs[index + 1].focus(); 
+            }
+            // Optional: If user types all 4 numbers manually, trigger the 3s submit logic too
+            if (getOtpValue().length === 4) {
+                setTimeout(() => {
+                    if (getOtpValue().length === 4 && !verifyOtpBtn.disabled) {
+                        verifyOtpBtn.click();
+                    }
+                }, 3000);
+            }
         });
         input.addEventListener('keydown', function(e) {
-            if (e.key === 'Backspace' && !this.value && index > 0) { otpInputs[index - 1].focus(); }
+            if (e.key === 'Backspace' && !this.value && index > 0) { 
+                otpInputs[index - 1].focus(); 
+            }
         });
     });
     
@@ -331,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('otp1')) { document.getElementById('otp1').focus(); }
     }
 
-    // Bind logout cleanly
     $('#logoutBtn').on('click', function(e) {
         e.preventDefault();
         $.ajax({

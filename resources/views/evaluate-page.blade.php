@@ -1273,7 +1273,7 @@ function handleNoAnswerNext() {
                                     order_id: cartResponse.order_id
                                 }));
                                 
-                                alert('Evaluation completed successfully!');
+                                // alert('Evaluation completed successfully!');
                                 
                                 // Redirect to cart page
                                 window.location.href = '/cart';
