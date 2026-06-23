@@ -77,6 +77,17 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     // Quick model catalog search utility endpoint for Select2 dropdown
     Route::get('/api/search-models', [AdminController::class, 'searchModels']);
 
+    //dealers section
+   Route::get('/dealers', [AdminController::class, 'dealer_index'])->name('admin.dealers.index');
+    Route::post('/dealers/save', [AdminController::class, 'dealer_storeOrUpdate'])->name('admin.dealers.save');
+    Route::get('/dealers/edit/{id}', [AdminController::class, 'dealer_edit'])->name('admin.dealers.edit');
+    Route::post('/dealers/toggle/{id}', [AdminController::class, 'dealer_toggleStatus'])->name('admin.dealers.toggle');
+
+    //bidding section
+   Route::get('/bidding', [AdminController::class, 'bidding_index'])->name('admin.bidding.index');
+    Route::post('/bidding/save', [AdminController::class, 'bidding_storeOrUpdate'])->name('admin.bidding.save');
+    Route::get('/bidding/edit/{id}', [AdminController::class, 'bidding_edit'])->name('admin.bidding.edit');
+    Route::delete('/bidding/delete/{id}', [AdminController::class, 'bidding_destroy'])->name('admin.bidding.delete');
     
 });
 

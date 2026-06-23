@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 class AdminController extends Controller
 {
     public function showLogin()
@@ -446,5 +448,156 @@ public function update(Request $request)
 
     return view('buy_product', compact('stock', 'mediaGallery', 'relatedStocks'));
 }
+
+public function dealer_index(Request $request)
+    {
+       if ($request->ajax()) {
+            $dealers = DB::table('dealers')->orderBy('id', 'desc')->get();
+            return response()->json(['dealers' => $dealers]);
+        }
+
+        $districts = DB::table('districts')->select('id', 'district_name')->get();
+        return view('admin.dealers.index', compact('districts'));
+    }
+
+    // Secure Data Storage / Mutation Wrapper
+    public function dealer_storeOrUpdate(Request $request)
+    {
+       $request->validate([
+            'name' => 'required|string|max:255',
+            'shop_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'district' => 'required|array',
+        ]);
+
+        $id = $request->dealer_id;
+        
+        $data = [
+            'name' => $request->name,
+            'shop_name' => $request->shop_name,
+            'phone' => $request->phone,
+            'alternate_phone' => $request->alternate_phone,
+            'shop_address' => $request->shop_address,
+            'district' => json_encode($request->district),
+            'pan_no' => $request->pan_no,
+            'updated_at' => now(),
+        ];
+
+        if (!empty($request->mpin)) {
+            $data['mpin'] = Hash::make($request->mpin);
+        }
+
+        $fileFields = ['dealer_photo', 'shop_photo', 'proof_front', 'proof_back'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                if ($id) {
+                    $oldFile = DB::table('dealers')->where('id', $id)->value($field);
+                    if (!empty($oldFile) && file_exists(public_path($oldFile))) {
+                        @unlink(public_path($oldFile));
+                    }
+                }
+
+                $file = $request->file($field);
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/dealers'), $filename);
+                $data[$field] = 'uploads/dealers/' . $filename;
+            }
+        }
+
+        if ($id) {
+            DB::table('dealers')->where('id', $id)->update($data);
+            return response()->json(['success' => 'Dealer configuration saved successfully.']);
+        } else {
+            $data['status'] = 1; 
+            $data['created_at'] = now();
+            DB::table('dealers')->insert($data);
+            return response()->json(['success' => 'Dealer registered successfully.']);
+        }
+    }
+
+    // Fetch singular entry for dynamic modal structural injection
+    public function dealer_edit($id)
+    {
+       $dealer = DB::table('dealers')->where('id', $id)->first();
+        if (!$dealer) return response()->json(['error' => 'Record not found'], 404);
+        
+        $dealer->district = json_decode($dealer->district, true) ?? [];
+        return response()->json(['dealer' => $dealer]);
+    }
+
+    // Inline Status Change Operator
+    public function dealer_toggleStatus($id)
+    {
+      $dealer = DB::table('dealers')->where('id', $id)->first();
+        if (!$dealer) return response()->json(['error' => 'Record missing'], 404);
+
+        $newStatus = ($dealer->status == 1) ? 0 : 1;
+        DB::table('dealers')->where('id', $id)->update(['status' => $newStatus, 'updated_at' => now()]);
+
+        return response()->json(['success' => 'Status changed successfully.']);
+    }
+
+    public function bidding_index(Request $request)
+    {
+        if ($request->ajax()) {
+            $bids = DB::table('bidding')->orderBy('id', 'desc')->get();
+            return response()->json(['bids' => $bids]);
+        }
+
+        // Fetch valid districts for our Select2 form dropdown
+        $districts = DB::table('districts')->select('id', 'district_name')->get();
+        return view('admin.bidding.index', compact('districts'));
+    }
+
+    public function bidding_storeOrUpdate(Request $request)
+    {
+        $request->validate([
+            'district_id' => 'required|integer',
+            'bid_time_start' => 'required',
+            'bid_time_end' => 'required',
+            'bid_min_perc' => 'required|numeric',
+            'bid_max_perc' => 'required|numeric',
+        ]);
+
+        // Resolve structural district name from ID mapped via request
+        $district = DB::table('districts')->where('id', $request->district_id)->first();
+        if (!$district) {
+            return response()->json(['error' => 'Invalid district parameter tracking data.'], 422);
+        }
+
+        $id = $request->bid_id;
+
+        $data = [
+            'district_id' => $request->district_id,
+            'district_name' => $district->district_name,
+            'bid_time_start' => $request->bid_time_start,
+            'bid_time_end' => $request->bid_time_end,
+            'bid_min_perc' => $request->bid_min_perc,
+            'bid_max_perc' => $request->bid_max_perc,
+            'updated_at' => now(),
+        ];
+
+        if ($id) {
+            DB::table('bidding')->where('id', $id)->update($data);
+            return response()->json(['success' => 'Bidding profile configuration synchronized.']);
+        } else {
+            $data['created_at'] = now();
+            DB::table('bidding')->insert($data);
+            return response()->json(['success' => 'Bidding configuration mapped successfully.']);
+        }
+    }
+
+    public function bidding_edit($id)
+    {
+        $bid = DB::table('bidding')->where('id', $id)->first();
+        if (!$bid) return response()->json(['error' => 'Record profile missing.'], 404);
+        return response()->json(['bid' => $bid]);
+    }
+
+    public function bidding_destroy($id)
+    {
+        DB::table('bidding')->where('id', $id)->delete();
+        return response()->json(['success' => 'Bidding parameter dropped from matrix vaults.']);
+    }
 
 }

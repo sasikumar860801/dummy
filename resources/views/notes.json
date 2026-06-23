@@ -13,8 +13,9 @@ things to do
 7.overall test
 8.bug fixing
 
-  Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones']);
-    Route::get('/buy-refurbished-mobile-phones/buy-{slug}', [AdminController::class, 'buy_refubrished_phones']); // still wotn work
 
-
-
+vendor_id chnage into dealer_id and is_approved = 0 default 
+admin web stock work like auto seo work 
+assign is where condition user_id !=0 = assigned 
+completed / status and payment_status = completed
+api for dealer add their stock , edit stock , delete stock even file also delete .

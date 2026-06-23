@@ -43,6 +43,12 @@
         <a href="{{ route('admin.models') }}" class="nav-item-link {{ Route::is('admin.models') ? 'active' : '' }}">
             <i class="fas fa-mobile" style="width: 20px;"></i> Models
         </a>
+         <a href="{{ route('admin.dealers.index') }}" class="nav-item-link {{ Route::is('admin.dealers') ? 'active' : '' }}">
+            <i class="fas fa-boxes" style="width: 20px;"></i> Dealers
+        </a>
+         <a href="{{ route('admin.bidding.index') }}" class="nav-item-link {{ Route::is('admin.bidding') ? 'active' : '' }}">
+            <i class="fas fa-boxes" style="width: 20px;"></i> Bidding
+        </a>
     </nav>
 
     <div style="border-top: 1px solid #1e1e2a; padding-top: 15px;">

@@ -1090,6 +1090,7 @@ public function submitSellOrder(Request $request)
         $modelId = $request->input('model_id');
         $orderId = $request->input('order_id');
         
+        
         // Verify partial order item
         $partialItem = DB::table('partial_order_items')
             ->where('id', $partialOrderItemId)
@@ -1128,11 +1129,26 @@ public function submitSellOrder(Request $request)
         // Create order
         $allDetailsJson = json_encode($request->all());
         $paymentMethod = $request->input('payment_method');
+$pincode = $request->input('pincode');
+
+        $districtName = DB::table('post_offices')
+    ->where('pincode', $pincode)
+    ->value('district');
+
+$districtId = DB::table('districts')
+    ->where('district_name', $districtName)
+    ->value('id');
+
+      $area_name = DB::table('post_offices')
+    ->where('pincode', $pincode)
+    ->value('officename');
         
        $orderData = [
     'user_id' => $userId,
     'order_id' => $orderId,
-
+      'district_id' => $districtId,
+    'district_name' => $districtName,
+    'area_name' => $area_name,
     'partial_order_item_id' => $partialOrderItemId,
     'model_id' => $modelId,
 
