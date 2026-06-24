@@ -27,7 +27,9 @@ Route::middleware('dealer.auth')->group(function () {
     Route::get('/history-leads', [dealerController::class, 'history_leads']);
     Route::get('/profile', [dealerController::class, 'profile']);
     Route::post('/placeBid', [dealerController::class, 'placeBid']);
-
+Route::post('/create-dealer-stock', [dealerController::class, 'createDealerStock']);
+Route::post('/edit-dealer-stock', [dealerController::class, 'editDealerStock']);
+    Route::post('/delete-dealer-stock', [dealerController::class, 'deleteDealerStock']);
 });
 
 // Route::middleware('dealer.auth')->get('/dealer-products', function (Illuminate\Http\Request $request) {

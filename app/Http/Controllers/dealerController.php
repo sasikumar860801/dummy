@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 class dealerController extends Controller
 {
      public function getOtp(Request $request)
@@ -749,4 +750,279 @@ public function placeBid(Request $request)
         ]);
     }
 }
+
+public function createDealerStock(Request $request) 
+    {
+        
+        // 1. Validate incoming parameters cleanly
+        $validator = Validator::make($request->all(), [
+            'model_id'     => 'required|exists:model,id',
+            'capacity'     => 'required|string|max:100',
+            'buy_price'    => 'required|numeric|min:0',
+            'color'        => 'required|string|max:100',
+            'imei_no_1'    => 'required|string|max:50|unique:stocks,imei_no_1',
+            'imei_no_2'    => 'nullable|string|max:50',
+            'warranty'     => 'required|string|max:255',
+            'media'        => 'required|array|min:1',
+            'media.*'      => 'file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,webm|max:20480' // Max 20MB supporting videos
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $validator->errors()->first(),
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        // 2. Extract context attributes safely injected by your middleware layer
+        $dealerId = $request->input('dealer_id');
+        if (!$dealerId) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized dealer context mapping.'], 401);
+        }
+
+        // 3. Retrieve model information to engineer premium SEO properties
+        $model = DB::table('model')->where('id', $request->model_id)->first();
+        if (!$model) {
+            return response()->json(['status' => 'error', 'message' => 'Target phone model variants not found.'], 404);
+        }
+
+        try {
+            // 4. File uploads collection execution loop pipeline framework
+            $uploadedMediaPaths = [];
+            if ($request->hasFile('media')) {
+                foreach ($request->file('media') as $file) {
+                    $uniquePrefix = time() . '_' . uniqid();
+                    $fileName = $uniquePrefix . '.' . $file->getClientOriginalExtension();
+                    
+                    // Moves resource to public/media/images/stock/ structure path rules
+                    $file->move(public_path('media/images/stock'), $fileName);
+                    
+                    // Match requested structured slash output format string path arrays
+                    $uploadedMediaPaths[] = "media/images/stock/" . $fileName;
+                }
+            }
+
+            // 5. Build dynamic programmatic smart SEO configurations framework 
+            $modelTitle = $model->title;
+            $variantInfo = $request->capacity . ' (' . Str::title($request->color) . ')';
+            
+            $metaTitle = "Best Refurbished " . $modelTitle . " " . $variantInfo . " | Certified Pre-Owned";
+            $metaDescription = "Buy a 100% certified refurbished " . $modelTitle . " " . $variantInfo . " with " . $request->warranty . " warranty. Fully tested, secure diagnostic logs verified, and ready to dispatch today at a fraction of retail pricing!";
+            $metaKeywords = "refurbished " . $modelTitle . ", buy second hand " . $modelTitle . ", " . $modelTitle . " " . $request->capacity . ", certified preowned phones, discount smart phones";
+            $canonicalUrl = url('/refurbished-phones/' . Str::slug($modelTitle . '-' . $variantInfo . '-' . $request->imei_no_1));
+
+            // Generate clean structural rich product schema markdown properties
+            $schemaData = [
+                "@context"    => "https://schema.org/",
+                "@type"       => "Product",
+                "name"        => "Certified Refurbished " . $modelTitle . " " . $variantInfo,
+                "description" => $metaDescription,
+                "offers"      => [
+                    "@type"         => "Offer",
+                    "priceCurrency" => "INR",
+                    "price"         => $request->buy_price,
+                    "itemCondition" => "https://schema.org/RefurbishedCondition",
+                    "availability"  => "https://schema.org/InStock"
+                ]
+            ];
+
+            // Unique tracking receipt generation identifier logic matrix parameters
+            $orderId = 'ORD' . random_int(1000000000, 9999999999);
+
+            // 6. DB Core payload creation operation tracking layout blocks
+            DB::table('stocks')->insert([
+                'order_id'            => $orderId,
+                'user_id'             => 0, // Fallback placeholder defaults
+                'dealer_id'           => $dealerId,
+                'bidding'             => json_encode([]),
+                'model_id'            => $request->model_id,
+                'capacity'            => $request->capacity,
+                'buy_price'           => $request->buy_price,
+                'sell_price'          => 0.00, // Left tracking zero for admin to set and override
+                'color'               => $request->color,
+                'imei_no_1'           => $request->imei_no_1,
+                'imei_no_2'           => $request->imei_no_2,
+                'warranty'            => $request->warranty,
+                'profit_percent_user' => 0,
+                'profit_perc_vendor'  => 0,
+                'profit'              => 0.00,
+                'status'              => 'pending',
+                'payment_status'      => 'unpaid',
+                'is_approved'         => 0, // Pending validation by default parameters
+                'purchase_date'       => now()->toDateString(),
+                'meta_title'          => $metaTitle,
+                'meta_description'    => $metaDescription,
+                'meta_keywords'       => $metaKeywords,
+                'canonical_url'       => $canonicalUrl,
+                'schema_data'         => json_encode($schemaData),
+                'media'               => json_encode($uploadedMediaPaths), // JSON String conversion outputs array list
+                'meta_robots'         => 'index, follow',
+                'created_at'          => now(),
+                'updated_at'          => now()
+            ]);
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Stock inventory entry successfully captured! Awaiting administrator approval routing.',
+                'data'    => [
+                    'order_id' => $orderId
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'System execution tracking fault failure processing creation payload.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function editDealerStock(Request $request) 
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id'   => 'required|string|exists:stocks,order_id',
+            'model_id'   => 'required|exists:model,id',
+            'capacity'   => 'required|string|max:100',
+            'buy_price'  => 'required|numeric|min:0',
+            'color'      => 'required|string|max:100',
+            'imei_no_1'  => 'required|string|max:50',
+            'imei_no_2'  => 'nullable|string|max:50',
+            'warranty'   => 'required|string|max:255',
+            'media'      => 'nullable|array', // Optional: only send if updating media
+            'media.*'    => 'file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,webm|max:20480'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()->first()], 422);
+        }
+
+        $dealerId = $request->input('dealer_id');
+
+        // Locate the target stock row matching both order_id and dealer_id
+        $stock = DB::table('stocks')
+            ->where('order_id', $request->order_id)
+            ->where('dealer_id', $dealerId)
+            ->first();
+
+        if (!$stock) {
+            return response()->json(['status' => 'error', 'message' => 'Stock record not found or unauthorized.'], 404);
+        }
+
+        // CRITICAL CHECK: Block updates if already approved by admin
+        if ((int)$stock->is_approved === 1) {
+            return response()->json(['status' => 'error', 'message' => 'Approved stock records are locked and cannot be edited.'], 403);
+        }
+
+        // Ensure IMEI is unique to other rows (excluding itself)
+        $imeiCheck = DB::table('stocks')
+            ->where('imei_no_1', $request->imei_no_1)
+            ->where('id', '!=', $stock->id)
+            ->exists();
+            
+        if ($imeiCheck) {
+            return response()->json(['status' => 'error', 'message' => 'The IMEI number 1 has already been registered.'], 422);
+        }
+
+        try {
+            $model = DB::table('model')->where('id', $request->model_id)->first();
+            
+            // Handle media update if new files are provided
+            if ($request->hasFile('media')) {
+                // Delete older files from local directory storage
+                $oldMedia = json_decode($stock->media, true) ?? [];
+                foreach ($oldMedia as $oldPath) {
+                    $absolutePath = public_path($oldPath);
+                    if (File::exists($absolutePath)) {
+                        File::delete($absolutePath);
+                    }
+                }
+
+                // Upload new incoming media replacement assets
+                $uploadedMediaPaths = [];
+                foreach ($request->file('media') as $file) {
+                    $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('media/images/stock'), $fileName);
+                    $uploadedMediaPaths[] = "media/images/stock/" . $fileName;
+                }
+                $mediaPayload = json_encode($uploadedMediaPaths);
+            } else {
+                // Keep the existing media files if nothing new was uploaded
+                $mediaPayload = $stock->media;
+            }
+
+            // Regenerate the smart optimized SEO properties
+            $variantInfo = $request->capacity . ' (' . Str::title($request->color) . ')';
+            $metaTitle = "Best Refurbished " . $model->title . " " . $variantInfo . " | Certified Pre-Owned";
+            $metaDescription = "Buy a 100% certified refurbished " . $model->title . " " . $variantInfo . " with " . $request->warranty . " warranty.";
+
+            // Save updates to database row
+            DB::table('stocks')
+                ->where('id', $stock->id)
+                ->update([
+                    'model_id'         => $request->model_id,
+                    'capacity'         => $request->capacity,
+                    'buy_price'        => $request->buy_price,
+                    'color'            => $request->color,
+                    'imei_no_1'        => $request->imei_no_1,
+                    'imei_no_2'        => $request->imei_no_2,
+                    'warranty'         => $request->warranty,
+                    'media'            => $mediaPayload,
+                    'meta_title'       => $metaTitle,
+                    'meta_description' => $metaDescription,
+                    'updated_at'       => now()
+                ]);
+
+            return response()->json(['status' => 'success', 'message' => 'Stock record successfully updated!']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // ==========================================
+    // API: DELETE DEALER STOCK (With Local Files)
+    // ==========================================
+    public function deleteDealerStock(Request $request) 
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|string|exists:stocks,order_id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()->first()], 422);
+        }
+
+        $dealerId = $request->input('dealer_id');
+
+        // Locate and confirm row context ownership
+        $stock = DB::table('stocks')
+            ->where('order_id', $request->order_id)
+            ->where('dealer_id', $dealerId)
+            ->first();
+
+        if (!$stock) {
+            return response()->json(['status' => 'error', 'message' => 'Stock record not found or unauthorized.'], 404);
+        }
+
+        try {
+            // 1. Loop through and delete physical media files from server directory storage
+            $mediaFiles = json_decode($stock->media, true) ?? [];
+            foreach ($mediaFiles as $filePath) {
+                $absolutePath = public_path($filePath);
+                if (File::exists($absolutePath)) {
+                    File::delete($absolutePath);
+                }
+            }
+
+            // 2. Clear database row entry
+            DB::table('stocks')->where('id', $stock->id)->delete();
+
+            return response()->json(['status' => 'success', 'message' => 'Stock listing and all related media permanently deleted.']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

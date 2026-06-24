@@ -133,7 +133,7 @@ class AdminController extends Controller
         DB::table('stocks')->insert([
             'order_id'            => $orderId,
             'user_id'             => DB::table('orders')->where('order_id', $orderId)->value('user_id'),
-            'vendor_id'           => DB::table('order_items')->where('order_id', $orderId)->value('vendor_id'),
+            'dealer_id'           => DB::table('order_items')->where('order_id', $orderId)->value('vendor_id'),
             'model_id'            => $request->input('model_id'),
             'capacity'            => $request->input('capacity'),
             'buy_price'           => $buyPrice,
@@ -158,6 +158,7 @@ class AdminController extends Controller
     public function stock_index()
     {
         
+        
         // Live base query with product schema properties
         $baseQuery = DB::table('stocks')
             ->join('model', 'stocks.model_id', '=', 'model.id')
@@ -167,14 +168,14 @@ class AdminController extends Controller
         $newStock = (clone $baseQuery)
             ->where('stocks.status', 'pending')
             ->where(function($q) { $q->whereNull('stocks.user_id')->orWhere('stocks.user_id', 0); })
-            ->where(function($q) { $q->whereNull('stocks.vendor_id')->orWhere('stocks.vendor_id', 0); })
+            ->where(function($q) { $q->whereNull('stocks.dealer_id')->orWhere('stocks.dealer_id', 0); })
             ->orderBy('stocks.id', 'desc')->get();
 
         $assignedStock = (clone $baseQuery)
             ->where('stocks.status', 'pending')
             ->whereNotNull('stocks.user_id')
             ->where('stocks.user_id', '!=', 0)
-            ->where(function($q) { $q->whereNull('stocks.vendor_id')->orWhere('stocks.vendor_id', 0); })
+            ->where(function($q) { $q->whereNull('stocks.dealer_id')->orWhere('stocks.dealer_id', 0); })
             ->orderBy('stocks.id', 'desc')->get();
 
         $completedStock = (clone $baseQuery)
@@ -231,7 +232,7 @@ class AdminController extends Controller
         DB::table('stocks')->insert([
             'order_id'            => $request->input('order_id'),
             'user_id'             => 0,
-            'vendor_id'           => 0,
+            'dealer_id'           => 0,
             'model_id'            => $request->input('model_id'),
             'capacity'            => $request->input('capacity'),
             'buy_price'           => $buyPrice,
@@ -337,7 +338,7 @@ public function update(Request $request)
         if ($action === 'unassign') {
             DB::table('stocks')->where('id', $id)->update([
                 'user_id' => 0,
-                'vendor_id' => 0,
+                'dealer_id' => 0,
                 'updated_at' => Carbon::now()
             ]);
             return response()->json(['success' => true, 'message' => 'Asset unassigned and moved to New Stock.']);
@@ -352,27 +353,33 @@ public function update(Request $request)
         return response()->json(['success' => false, 'message' => 'Invalid structural route action execution request.'], 400);
     }
 
-    public function all_refubrished_phones()
-    {
-        // Query live stocks and match with model data attributes
-        $products = DB::table('stocks')
-            ->join('model', 'stocks.model_id', '=', 'model.id')
-            ->select(
-                'stocks.id',
-                'stocks.buy_price',
-                'stocks.sell_price',
-                'stocks.warranty',
-                'stocks.capacity',
-                'model.title as model_title',
-                'model.model_img'
-            )
-            ->where('stocks.status', 'pending')
-            ->orderBy('stocks.buy_price', 'desc')
-            ->paginate(12); // Using pagination instead of get() for clean page loads
+   public function all_refubrished_phones()
+{
+    // 1. Fetch your target approved inventory products
+    $products = DB::table('stocks')
+        ->join('model', 'stocks.model_id', '=', 'model.id')
+        ->join('brand', 'model.brand_id', '=', 'brand.id')
+        ->select(
+            'stocks.id',
+            'stocks.buy_price',
+            'stocks.sell_price',
+            'stocks.warranty',
+            'stocks.capacity',
+            'stocks.color',
+            'model.title as model_title',
+            'model.model_img',
+            'brand.title as brand_title'
+        )
+        ->where('stocks.status', 'pending')
+        ->where('stocks.is_approved', 1)
+        ->orderBy('stocks.buy_price', 'desc')
+        ->get(); // Using get() for full instant catalog client-side filtering
 
-        // Return view path containing payload collection
-        return view('refurbished_phones', compact('products'));
-    }
+    // 2. Dynamically extract unique active brand options for the tab row
+    $brands = $products->pluck('brand_title')->unique()->toArray();
+
+    return view('refurbished_phones', compact('products', 'brands'));
+}
 
     public function buy_refubrished_phones($slug)
 {
@@ -598,6 +605,111 @@ public function dealer_index(Request $request)
     {
         DB::table('bidding')->where('id', $id)->delete();
         return response()->json(['success' => 'Bidding parameter dropped from matrix vaults.']);
+    }
+
+    public function dealer_stock_index(Request $request) {
+     $stocks = DB::table('stocks')
+        ->join('dealers', 'stocks.dealer_id', '=', 'dealers.id')
+        ->leftJoin('model', 'stocks.model_id', '=', 'model.id')
+        ->where('stocks.dealer_id', '!=', 0)
+        ->select(
+            'stocks.*', 
+            'dealers.name as dealer_name', 
+            'dealers.phone as dealer_phone', 
+            'dealers.shop_name',
+            'dealers.district as dealer_district_json', // Grab the JSON column here
+            'model.title'
+        )
+        ->orderBy('stocks.id', 'desc')
+        ->get();
+
+    // 2. Map the district names directly onto each stock record
+    foreach ($stocks as $stock) {
+        $districtIds = json_decode($stock->dealer_district_json, true) ?? [];
+
+        $namesArray = DB::table('districts')
+            ->whereIn('id', $districtIds)
+            ->pluck('district_name')
+            ->toArray();
+
+        // Attach it securely so $row->district_names becomes available in Blade
+        $stock->district_names = !empty($namesArray) ? implode(', ', $namesArray) : 'No District';
+    }
+
+    // 3. Keep these for your modal dropdown fields
+    $dealers = DB::table('dealers')->where('status', 1)->get();
+    $models = DB::table('model')->get();
+
+    return view('admin.dealer_stock.index', compact('stocks', 'dealers', 'models'));
+}
+
+      
+    public function dealer_stock_storeOrUpdate(Request $request) {
+       $id = $request->stock_id;
+        
+        $data = [
+            'dealer_id' => $request->dealer_id,
+            'model_id' => $request->model_id,
+            'capacity' => $request->capacity,
+            'buy_price' => $request->buy_price,
+            'sell_price' => $request->sell_price ?? $request->buy_price,
+            'color' => $request->color,
+            'imei_no_1' => $request->imei_no_1,
+            'imei_no_2' => $request->imei_no_2,
+            'warranty' => $request->warranty,
+            'updated_at' => now(),
+        ];
+
+        if ($request->hasFile('media_files')) {
+            $uploadedFiles = [];
+            foreach ($request->file('media_files') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('media/images/stock'), $filename);
+                $uploadedFiles[] = 'media/images/stock/' . $filename;
+            }
+            $data['media'] = json_encode($uploadedFiles);
+        }
+
+        if ($id) {
+            DB::table('stocks')->where('id', $id)->update($data);
+            return response()->json(['success' => 'Stock parameters updated successfully.']);
+        } else {
+            $data['order_id'] = 'ORD' . rand(100000, 999999);
+            $data['is_approved'] = 0; 
+            $data['purchase_date'] = now();
+            $data['created_at'] = now();
+            
+            DB::table('stocks')->insert($data);
+            return response()->json(['success' => 'Stock provisioned successfully.']);
+        }
+    }
+
+    public function dealer_stock_edit($id) {
+     $stock = DB::table('stocks')->where('id', $id)->first();
+        return response()->json(['stock' => $stock]);
+    }
+
+    public function dealer_stock_approve($id) {
+       DB::table('stocks')->where('id', $id)->update([
+            'is_approved' => 1,
+            'updated_at' => now()
+        ]);
+        return response()->json(['success' => 'Stock approved successfully.']);
+    }
+
+    public function dealer_stock_reject($id) {
+       $stock = DB::table('stocks')->where('id', $id)->first();
+        if ($stock) {
+            // Decodes media array and physically unlinks existing files from storage
+            $mediaPaths = json_decode($stock->media, true) ?? [];
+            foreach ($mediaPaths as $path) {
+                if (!empty($path) && file_exists(public_path($path))) {
+                    @unlink(public_path($path));
+                }
+            }
+            DB::table('stocks')->where('id', $id)->delete();
+        }
+        return response()->json(['success' => 'Stock record and associated media removed successfully.']);
     }
 
 }

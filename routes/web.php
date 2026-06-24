@@ -88,6 +88,12 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     Route::post('/bidding/save', [AdminController::class, 'bidding_storeOrUpdate'])->name('admin.bidding.save');
     Route::get('/bidding/edit/{id}', [AdminController::class, 'bidding_edit'])->name('admin.bidding.edit');
     Route::delete('/bidding/delete/{id}', [AdminController::class, 'bidding_destroy'])->name('admin.bidding.delete');
+
+    Route::get('/dealer-stock', [AdminController::class, 'dealer_stock_index'])->name('admin.dealerStock.index');
+    Route::post('/dealer-stock/save', [AdminController::class, 'dealer_stock_storeOrUpdate'])->name('admin.dealerStock.save');
+    Route::get('/dealer-stock/edit/{id}', [AdminController::class, 'dealer_stock_edit'])->name('admin.dealerStock.edit');
+    Route::post('/dealer-stock/approve/{id}', [AdminController::class, 'dealer_stock_approve'])->name('admin.dealerStock.approve');
+    Route::delete('/dealer-stock/reject/{id}', [AdminController::class, 'dealer_stock_reject'])->name('admin.dealerStock.reject');
     
 });
 
