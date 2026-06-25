@@ -302,6 +302,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         </button>
                     </div>
                 `;
+                    const finalBtn = document.getElementById('finalBtn');
+                    if (finalBtn) {
+                        finalBtn.click();
+                    }
+
+                    const baseUrl = "{{ url('/') }}";
+                    if (window.location.href === baseUrl || window.location.href === baseUrl + '/') {
+                        window.location.reload();
+                    }
             }
 
 else {

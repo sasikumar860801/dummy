@@ -80,7 +80,7 @@
                     <p style="color: #64748b; font-size: 12px; margin-top: 4px;">{{ $user->phone }}</p>
                 </div>
 
-                <nav>
+             <nav>
                     <a href="{{ route('profile') }}" class="sidebar-link">
                         <i class="fas fa-user" style="width: 20px;"></i> My Profile
                     </a>
@@ -88,7 +88,10 @@
                         <i class="fas fa-shopping-cart" style="width: 20px;"></i> My Cart
                     </a>
                     <a href="{{ route('my-orders') }}" class="sidebar-link active">
-                        <i class="fas fa-box-open" style="width: 20px;"></i> My Order
+                        <i class="fas fa-box-open" style="width: 20px;"></i> Sell Orders
+                    </a>
+                    <a href="{{ route('buy_orders') }}" class="sidebar-link ">
+                        <i class="fas fa-shopping-bag" style="width: 20px;"></i> Buy Orders
                     </a>
                     <hr style="border: none; border-top: 1px solid #1e1e2a; margin: 15px 0;">
                     <form id="logoutForm" method="POST" action="{{ route('logout') }}">

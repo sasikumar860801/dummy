@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+
 class AdminController extends Controller
 {
     public function showLogin()
@@ -197,7 +200,7 @@ class AdminController extends Controller
         return response()->json(['results' => $models]);
     }
 
-   public function store(Request $request)
+  public function store(Request $request)
     {
         $request->validate([
             'order_id'   => 'required',
@@ -207,30 +210,57 @@ class AdminController extends Controller
             'color'      => 'required',
             'imei_no_1'  => 'required',
             'warranty'   => 'required',
-            'media.*'    => 'nullable|file|mimes:jpeg,jpg,png,webp,mp4,mov,avi|max:20480', // 20MB Max per file
-            'meta_title' => 'nullable|string|max:255',
+            'media.*'    => 'nullable|file|mimes:jpeg,jpg,png,webp,mp4,mov,avi|max:20480',
         ]);
 
         $buyPrice = (float)$request->input('buy_price');
         $pUserPercent = (int)($request->input('profit_percent_user') ?? 20);
         $profit = ($buyPrice * $pUserPercent) / 100;
 
+        // Fetch model information to engineer premium SEO properties
+        $model = DB::table('model')->where('id', $request->input('model_id'))->first();
+        if (!$model) {
+            return response()->json(['success' => false, 'message' => 'Target phone model not found.'], 404);
+        }
+
+        // Build dynamic programmatic smart SEO configurations
+        $modelTitle = $model->title;
+        $variantInfo = $request->input('capacity') . ' (' . Str::title($request->input('color')) . ')';
+        
+        $metaTitle = "Best Refurbished " . $modelTitle . " " . $variantInfo . " | Certified Pre-Owned";
+        $metaDescription = "Buy a 100% certified refurbished " . $modelTitle . " " . $variantInfo . " with " . $request->input('warranty') . " warranty. Fully tested, verified, and ready to dispatch today at a fraction of retail pricing!";
+        $metaKeywords = "refurbished " . $modelTitle . ", buy second hand " . $modelTitle . ", " . $modelTitle . " " . $request->input('capacity') . ", certified preowned phones, discount smart phones";
+        $canonicalUrl = url('/refurbished-phones/' . Str::slug($modelTitle . '-' . $variantInfo . '-' . $request->input('imei_no_1')));
+
+        $schemaData = [
+            "@context"    => "https://schema.org/",
+            "@type"       => "Product",
+            "name"        => "Certified Refurbished " . $modelTitle . " " . $variantInfo,
+            "description" => $metaDescription,
+            "offers"      => [
+                "@type"         => "Offer",
+                "priceCurrency" => "INR",
+                "price"         => $buyPrice,
+                "itemCondition" => "https://schema.org/RefurbishedCondition",
+                "availability"  => "https://schema.org/InStock"
+            ]
+        ];
+
         // Process File Media Stream Array Uploads
         $mediaPaths = [];
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
                 if ($file->isValid()) {
-                    // Generate distinctive asset storage designation signature
                     $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    // Move item straight to your custom destination directory paths layout
                     $file->move(public_path('media/images/stock'), $filename);
                     $mediaPaths[] = 'media/images/stock/' . $filename;
                 }
             }
         }
+        $orderId = 'ORD' . random_int(1000000000, 9999999999);
 
         DB::table('stocks')->insert([
-            'order_id'            => $request->input('order_id'),
+            'order_id'            => $orderId,
             'user_id'             => 0,
             'dealer_id'           => 0,
             'model_id'            => $request->input('model_id'),
@@ -247,26 +277,24 @@ class AdminController extends Controller
             'status'              => 'pending',
             'payment_status'      => 'pending',
             
-            // SEO & Structured Web Crawl Properties Mapping
-            'meta_title'          => $request->input('meta_title'),
-            'meta_description'    => $request->input('meta_description'),
-            'meta_keywords'       => $request->input('meta_keywords'),
-            'canonical_url'       => $request->input('canonical_url'),
-            'schema_data'         => $request->input('schema_data'),
-            'meta_robots'         => $request->input('meta_robots') ?? 'index, follow',
+            // Automated SEO Mapping
+            'meta_title'          => $metaTitle,
+            'meta_description'    => $metaDescription,
+            'meta_keywords'       => $metaKeywords,
+            'canonical_url'       => $canonicalUrl,
+            'schema_data'         => json_encode($schemaData),
+            'meta_robots'         => 'index, follow',
             
-            // Dynamic Assets Storage String Array
             'media'               => json_encode($mediaPaths),
-            
             'purchase_date'       => Carbon::now()->toDateString(),
             'created_at'          => Carbon::now(),
             'updated_at'          => Carbon::now()
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Manual asset entry saved successfully.']);
+        return response()->json(['success' => true, 'message' => 'Manual asset entry saved successfully with automated SEO.']);
     }
     
-public function update(Request $request)
+    public function update(Request $request)
     {
         $request->validate([
             'id'         => 'required',
@@ -283,11 +311,39 @@ public function update(Request $request)
         $pUserPercent = (int)$request->input('profit_percent_user');
         $profit = ($buyPrice * $pUserPercent) / 100;
 
-        // Fetch existing asset dataset row record to safely preserve old media references
+        // Fetch existing asset dataset row to preserve media and get the model_id
         $currentStock = DB::table('stocks')->where('id', $id)->first();
-        $existingMedia = $currentStock && $currentStock->media ? json_decode($currentStock->media, true) : [];
+        if (!$currentStock) {
+            return response()->json(['success' => false, 'message' => 'Stock record not found.'], 404);
+        }
 
-        // Append newly captured file uploads to the array loop structure
+        $existingMedia = $currentStock->media ? json_decode($currentStock->media, true) : [];
+
+        // Fetch model to regenerate SEO based on potential capacity/color updates
+        $model = DB::table('model')->where('id', $currentStock->model_id)->first();
+        $modelTitle = $model ? $model->title : 'Premium Smartphone';
+        $variantInfo = $request->input('capacity') . ' (' . Str::title($request->input('color')) . ')';
+
+        $metaTitle = "Best Refurbished " . $modelTitle . " " . $variantInfo . " | Certified Pre-Owned";
+        $metaDescription = "Buy a 100% certified refurbished " . $modelTitle . " " . $variantInfo . " with " . $request->input('warranty') . " warranty. Fully tested, verified, and ready to dispatch today!";
+        $metaKeywords = "refurbished " . $modelTitle . ", buy second hand " . $modelTitle . ", " . $modelTitle . " " . $request->input('capacity');
+        $canonicalUrl = url('/refurbished-phones/' . Str::slug($modelTitle . '-' . $variantInfo . '-' . $request->input('imei_no_1')));
+
+        $schemaData = [
+            "@context"    => "https://schema.org/",
+            "@type"       => "Product",
+            "name"        => "Certified Refurbished " . $modelTitle . " " . $variantInfo,
+            "description" => $metaDescription,
+            "offers"      => [
+                "@type"         => "Offer",
+                "priceCurrency" => "INR",
+                "price"         => $buyPrice,
+                "itemCondition" => "https://schema.org/RefurbishedCondition",
+                "availability"  => "https://schema.org/InStock"
+            ]
+        ];
+
+        // Append newly captured file uploads
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
                 if ($file->isValid()) {
@@ -309,13 +365,12 @@ public function update(Request $request)
             'profit_perc_vendor'  => (int)$request->input('profit_perc_vendor'),
             'profit'              => $profit,
             
-            // Updated SEO Metadata values
-            'meta_title'          => $request->input('meta_title'),
-            'meta_description'    => $request->input('meta_description'),
-            'meta_keywords'       => $request->input('meta_keywords'),
-            'canonical_url'       => $request->input('canonical_url'),
-            'schema_data'         => $request->input('schema_data'),
-            'meta_robots'         => $request->input('meta_robots'),
+            // Re-mapped SEO values to keep them accurate after an update
+            'meta_title'          => $metaTitle,
+            'meta_description'    => $metaDescription,
+            'meta_keywords'       => $metaKeywords,
+            'canonical_url'       => $canonicalUrl,
+            'schema_data'         => json_encode($schemaData),
             
             'media'               => json_encode($existingMedia),
             'updated_at'          => Carbon::now()
@@ -362,6 +417,8 @@ public function update(Request $request)
         ->select(
             'stocks.id',
             'stocks.buy_price',
+            'stocks.order_id',          // NEW: Required for unique URL
+            'model.sef_url',            // NEW: Required for the SEO slug
             'stocks.sell_price',
             'stocks.warranty',
             'stocks.capacity',
@@ -381,10 +438,9 @@ public function update(Request $request)
     return view('refurbished_phones', compact('products', 'brands'));
 }
 
-    public function buy_refubrished_phones($slug)
+  public function buy_refubrished_phones($slug, $order_id)
 {
-    
-    // 1. Fetch the primary stock item matching the model's SEF URL slug
+    // 1. Fetch the exact stock item using order_id (which is truly unique)
     $stock = DB::table('stocks')
         ->join('model', 'stocks.model_id', '=', 'model.id')
         ->select(
@@ -393,17 +449,17 @@ public function update(Request $request)
             'model.model_img', 
             'model.sef_url'
         )
-        ->where('model.sef_url', $slug)
+        ->where('stocks.order_id', $order_id)
         ->where('stocks.status', 'pending')
         ->first();
 
-    if (!$stock) {
+    // Verify stock exists AND the URL slug strictly matches the database to prevent URL spoofing
+    if (!$stock || $stock->sef_url !== $slug) {
         abort(404, 'Refurbished Device Not Found or Already Sold.');
     }
 
     // 2. Normalize and check model_img base path syntax
     if (!empty($stock->model_img)) {
-        // If it doesn't contain a slash, it's just a raw filename; append your folder structure
         if (!str_contains($stock->model_img, '/')) {
             $stock->model_img = 'media/images/model/' . $stock->model_img;
         }
@@ -414,7 +470,6 @@ public function update(Request $request)
     if (!empty($stock->media)) {
         $parsedMedia = is_string($stock->media) ? json_decode($stock->media, true) : $stock->media;
         
-        // Loop through stock media array elements to fix their image paths if needed
         foreach ($parsedMedia as $mediaPath) {
             if (!empty($mediaPath)) {
                 if (!str_contains($mediaPath, '/')) {
@@ -431,27 +486,50 @@ public function update(Request $request)
         array_unshift($mediaGallery, $stock->model_img);
     }
 
-    // 4. Recommendation Engine ("You May Also Like")
+    // 4. Recommendation Engine (+/- 10k RS Price Match)
+    $targetPrice = $stock->buy_price;
+    $minPrice = $targetPrice - 10000;
+    $maxPrice = $targetPrice + 10000;
+
+    // Fetch up to 20 nearest stocks sorting by the absolute closest price difference
+ $relatedStocks = DB::table('stocks')
+    ->join('model', 'stocks.model_id', '=', 'model.id')
+    ->select(
+        'stocks.*',
+        'model.title as model_title',
+        'model.model_img',
+        'model.sef_url'
+    )
+    ->where('stocks.status', 'pending')
+    ->where('stocks.id', '!=', $stock->id)
+    ->whereBetween('stocks.buy_price', [$minPrice, $maxPrice])
+    ->orderByRaw('ABS(stocks.buy_price - ?)', [$targetPrice])
+    ->limit(20)
+    ->get();
+
+// If fewer than 5 related stocks found, show 20 random stocks instead
+if ($relatedStocks->count() < 5) {
     $relatedStocks = DB::table('stocks')
         ->join('model', 'stocks.model_id', '=', 'model.id')
         ->select(
-            'stocks.*', 
-            'model.title as model_title', 
-            'model.model_img', 
+            'stocks.*',
+            'model.title as model_title',
+            'model.model_img',
             'model.sef_url'
         )
         ->where('stocks.status', 'pending')
         ->where('stocks.id', '!=', $stock->id)
         ->inRandomOrder()
-        ->limit(4)
+        ->limit(20)
         ->get();
+}
 
-    // Map over related items to sanitize their individual model_img paths as well
-    foreach ($relatedStocks as $rel) {
-        if (!empty($rel->model_img) && !str_contains($rel->model_img, '/')) {
-            $rel->model_img = 'media/images/model/' . $rel->model_img;
-        }
+// Sanitize image paths
+foreach ($relatedStocks as $rel) {
+    if (!empty($rel->model_img) && !str_contains($rel->model_img, '/')) {
+        $rel->model_img = 'media/images/model/' . $rel->model_img;
     }
+}
 
     return view('buy_product', compact('stock', 'mediaGallery', 'relatedStocks'));
 }

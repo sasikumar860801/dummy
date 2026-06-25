@@ -145,6 +145,44 @@
 @endpush
 
 @section('content')
+
+<button id="finalBtn" style="display: none;" onclick="resumeCheckoutAfterLogin()"></button>
+
+<div id="checkoutPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 8, 0.85); z-index: 99999; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+    <div style="background: #111118; border-radius: 24px; padding: 40px; max-width: 500px; width: 90%; border: 1px solid #2a2a3a; position: relative;">
+        <button onclick="document.getElementById('checkoutPopup').style.display='none'" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
+        
+        <h3 style="color: white; margin-bottom: 5px; font-size: 22px;">Delivery Details</h3>
+        <p style="color: #64748b; margin-bottom: 25px; font-size: 14px;">Where should we ship this device?</p>
+        
+        <form id="checkoutForm" onsubmit="submitOrderPayload(event)">
+            <input type="hidden" id="checkoutStockId" name="stock_id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <input type="text" id="custName" required placeholder="Full Name" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; outline: none;">
+                <input type="email" id="custEmail" required placeholder="Email Address" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; outline: none;">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <input type="tel" id="custPhone" required placeholder="Phone Number" maxlength="10" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; outline: none;">
+                <input type="tel" id="custAltPhone" placeholder="Alternate Phone (Optional)" maxlength="10" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; outline: none;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <textarea id="custAddress" required placeholder="Complete Delivery Address (House No, Street, Landmark)" rows="3" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; resize: none; outline: none;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <input type="text" id="custPincode" required placeholder="Pincode" maxlength="6" style="width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px; color: white; outline: none;">
+            </div>
+
+            <button type="submit" id="confirmOrderBtn" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 16px; transition: 0.2s;">
+                Confirm Order & Update Details
+            </button>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     <div class="product-container">
         
@@ -215,8 +253,8 @@
                     $thumbSrc = !empty($rel->model_img) ? $rel->model_img : 'placeholder.png';
                     $calculatedPrice = $rel->buy_price + ($rel->buy_price * ($rel->profit_percent_user / 100));
                 @endphp
-                <a href="/buy-refurbished-mobile-phones/buy-{{ $rel->sef_url }}" class="rec-card">
-                    <div>
+                <a href="{{ route('buy_refubrished_phones', ['slug' => $rel->sef_url, 'order_id' => $rel->order_id]) }}" class="rec-card">
+                        <div>
                         <div class="rec-img-holder">
                             <img src="{{ asset($thumbSrc) }}" alt="{{ $rel->model_title }}">
                         </div>
@@ -252,8 +290,85 @@
         }
     }
 
-    function executeInstantCheckout(stockId) {
-        alert("Proceeding to checkout module for Stock ID: " + stockId + ". This payload route logic will be hooked up in the next phase!");
+   // Check server-side session status on page load
+const isUserLoggedIn = @json(Session::has('user_id'));
+let pendingCheckoutStockId = null;
+
+function executeInstantCheckout(stockId) {
+    if (!isUserLoggedIn && !document.getElementById('userSection').innerHTML.includes('fa-user-circle')) {
+        // User is not logged in. Save the stock ID to memory.
+        pendingCheckoutStockId = stockId;
+        
+        // Trigger your existing login popup from header
+        document.getElementById('loginPopup').style.display = 'flex';
+        document.getElementById('phoneStep').style.display = 'block';
+        document.getElementById('otpStep').style.display = 'none';
+        document.getElementById('mobileNumber').value = '';
+    } else {
+        // User is already logged in. Open checkout directly.
+        openCheckoutModal(stockId);
     }
+}
+
+// This is triggered by your header script's "finalBtn.click()" after successful OTP
+function resumeCheckoutAfterLogin() {
+    if (pendingCheckoutStockId) {
+        openCheckoutModal(pendingCheckoutStockId);
+        pendingCheckoutStockId = null; // Clear memory
+    }
+}
+
+function openCheckoutModal(stockId) {
+    document.getElementById('checkoutStockId').value = stockId;
+    document.getElementById('checkoutPopup').style.display = 'flex';
+}
+
+async function submitOrderPayload(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('confirmOrderBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+    const payload = {
+        stock_id: document.getElementById('checkoutStockId').value,
+        name: document.getElementById('custName').value,
+        email: document.getElementById('custEmail').value,
+        phone: document.getElementById('custPhone').value,
+        alt_phone: document.getElementById('custAltPhone').value,
+        address: document.getElementById('custAddress').value,
+        pincode: document.getElementById('custPincode').value,
+    };
+
+    try {
+        const response = await fetch('{{ route("api.checkout.process") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Success! Customer details saved and order placed.');
+            document.getElementById('checkoutPopup').style.display = 'none';
+            // Optional: Redirect to a success page here
+            // window.location.href = '/order-success'; 
+        } else {
+            alert(data.message || 'Error processing order.');
+            btn.disabled = false;
+            btn.innerHTML = 'Confirm Order & Update Details';
+        }
+    } catch (error) {
+        alert('Network error while processing checkout.');
+        btn.disabled = false;
+        btn.innerHTML = 'Confirm Order & Update Details';
+    }
+}
+
+
 </script>
 @endpush

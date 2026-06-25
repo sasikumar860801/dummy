@@ -80,7 +80,11 @@
                         </div>
                         
                         <div style="margin-top: 12px;">
-                            <button class="catalog-action-buy-btn">Buy Now</button>
+                            <a href="{{ route('buy_refubrished_phones', ['slug' => $product->sef_url, 'order_id' => $product->order_id]) }}" 
+                            class="catalog-action-buy-btn" 
+                            style="display: block; text-align: center; text-decoration: none; box-sizing: border-box;">
+                                Buy Now
+                            </a>
                         </div>
                     </div>
                 </div>

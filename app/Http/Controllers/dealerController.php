@@ -1025,4 +1025,55 @@ public function createDealerStock(Request $request)
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function listDealerStock(Request $request) 
+    {
+        $dealerId = $request->input('dealer_id');
+
+        try {
+            // Fetch stocks with pagination and join model/brand names
+            $stocks = DB::table('stocks')
+                ->join('model', 'stocks.model_id', '=', 'model.id')
+                ->leftJoin('brand', 'model.brand_id', '=', 'brand.id')
+                ->where('stocks.dealer_id', $dealerId)
+                ->select(
+                    'stocks.id',
+                    'stocks.order_id',
+                    'stocks.model_id',
+                    'brand.title as brand_title',
+                    'model.title as model_title',
+                    'stocks.capacity',
+                    'stocks.color',
+                    'stocks.buy_price',
+                    'stocks.sell_price',
+                    'stocks.imei_no_1',
+                    'stocks.imei_no_2',
+                    'stocks.warranty',
+                    'stocks.status',
+                    'stocks.is_approved',
+                    'stocks.media',
+                    'stocks.created_at'
+                )
+                ->orderBy('stocks.id', 'desc')
+                ->paginate(15); // Adjust this number based on your frontend needs
+
+            // Decode the media JSON string back into a workable array for the frontend
+            foreach ($stocks->items() as $stock) {
+                $stock->media = json_decode($stock->media, true) ?? [];
+            }
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Dealer stock inventory retrieved successfully.',
+                'data'    => $stocks
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to retrieve stock listings.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -20,8 +20,7 @@ Route::get('/sell-old-tablet/sell-{slug}', [UserController::class, 'tablet_model
 Route::get('/sell-old-mobile-phone/used-{slug}', [UserController::class, 'particular_model'])->name('particular_model');
 Route::get('/sell-old-mobile-phone/evaluate/{model_slug}/{variant_slug}', [UserController::class, 'evaluate_phone'])->name('evaluate_phone');
     Route::get('/buy-refurbished-mobile-phones/best-selling-phones', [AdminController::class, 'all_refubrished_phones'])->name('all_refubrished_phones');
-    Route::get('/buy-refurbished-mobile-phones/buy-{slug}', [AdminController::class, 'buy_refubrished_phones'])->name('buy_refubrished_phones'); // still wotn work
-    
+Route::get('/buy-refurbished-mobile-phones/buy-{slug}/{order_id}', [AdminController::class, 'buy_refubrished_phones'])->name('buy_refubrished_phones');    
 
 Route::post('/send-otp', [UserController::class, 'sendOtp'])->name('send.otp');
 Route::post('/verify-otp', [UserController::class, 'verifyOtp'])->name('verify.otp');
@@ -33,6 +32,7 @@ Route::get('/cart', [UserController::class, 'cart'])->name('cart');
 Route::get('/get_user_details', [UserController::class, 'getUserDetails'])->name('get.user.details');
 Route::post('/submit_sell_order', [UserController::class, 'submitSellOrder'])->name('submit.sell.order');
 Route::post('/put_into_cart', [UserController::class, 'putIntoCart'])->name('put.into.cart');
+Route::post('/processCheckout', [UserController::class, 'processCheckout'])->name('api.checkout.process');
 
 Route::get('/check-session', function() {
     return response()->json([
@@ -49,6 +49,7 @@ Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('
 Route::get('/my-cart', [UserController::class, 'my_cart'])->name('my-cart');
 Route::get('/my-orders', [UserController::class, 'my_orders'])->name('my-orders');
 Route::post('/cancel-order', [UserController::class, 'cancel_order'])->name('cancel.order');
+Route::get('/buy-orders', [UserController::class, 'buy_orders'])->name('buy_orders');
 
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');

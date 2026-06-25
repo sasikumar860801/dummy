@@ -9,6 +9,7 @@
             'stocks.id',
             'stocks.buy_price',
             'stocks.sell_price',
+            'stocks.order_id',
             'stocks.warranty',
             'stocks.capacity',
             'model.title as model_title',
@@ -74,9 +75,9 @@
                                         <span class="ticker-badge"><i class="fas fa-shield-alt" style="font-size: 9px;"></i> {{ Str::before($product->warranty, ' ') }}</span>
                                     </div>
 
-                                      <a href="{{ route('buy_refubrished_phones', ['slug' => $product->sef_url]) }}">
+                                      <a href="{{ route('buy_refubrished_phones', ['slug' => $product->sef_url, 'order_id' => $product->order_id]) }}">
                                             <button class="ticker-buy-btn">
-                                                Buyy Now <i class="fas fa-shopping-cart" style="font-size: 11px;"></i>
+                                                Buy Now <i class="fas fa-shopping-cart" style="font-size: 11px;"></i>
                                             </button>
                                         </a>
                                 </div>

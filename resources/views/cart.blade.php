@@ -428,8 +428,8 @@ function displaySummary(data) {
             data: formData,
             success: function(response) {
                 if (response.success) {
-                    alert('Order placed successfully! Order ID: ' + response.order_id);
-                    window.location.href = '/order-success/' + response.order_id;
+                   // alert('Order placed successfully! Order ID: ' + response.order_id);
+                    window.location.href = '/my-orders/';
                 } else {
                     alert('Error: ' + response.message);
                     $('#submitSellBtn').prop('disabled', false);

@@ -49,6 +49,9 @@
          <a href="{{ route('admin.bidding.index') }}" class="nav-item-link {{ Route::is('admin.bidding') ? 'active' : '' }}">
             <i class="fas fa-boxes" style="width: 20px;"></i> Bidding
         </a>
+         <a href="{{ route('admin.dealerStock.index') }}" class="nav-item-link {{ Route::is('admin.dealerStock') ? 'active' : '' }}">
+            <i class="fas fa-boxes" style="width: 20px;"></i> Dealer stock
+        </a>
     </nav>
 
     <div style="border-top: 1px solid #1e1e2a; padding-top: 15px;">

@@ -30,6 +30,7 @@ Route::middleware('dealer.auth')->group(function () {
 Route::post('/create-dealer-stock', [dealerController::class, 'createDealerStock']);
 Route::post('/edit-dealer-stock', [dealerController::class, 'editDealerStock']);
     Route::post('/delete-dealer-stock', [dealerController::class, 'deleteDealerStock']);
+    Route::get('/list-dealer-stock', [dealerController::class, 'listDealerStock']);
 });
 
 // Route::middleware('dealer.auth')->get('/dealer-products', function (Illuminate\Http\Request $request) {
