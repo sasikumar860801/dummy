@@ -50,6 +50,20 @@ class AdminController extends Controller
 
     public function dashboard()
     {
+       $dealer_stock_pending = DB::table('stocks')
+        ->where('is_approved', 0)
+        ->count();
+
+        $sell_orders_pending = DB::table('orders')
+            ->where('status', 'pending')
+            ->count();
+
+        $buy_orders_pending = DB::table('stocks')
+            ->where('is_approved', 1)
+            ->where('user_id', '!=', 0)
+            ->count();
+
+
         return view('admin.dashboard');
     }
 
@@ -789,5 +803,47 @@ public function dealer_index(Request $request)
         }
         return response()->json(['success' => 'Stock record and associated media removed successfully.']);
     }
+
+    public function buy_orders()
+{
+    // Fetch all stocks that have been purchased (user_id is set and not 0)
+    $allOrders = DB::table('stocks')
+        ->join('users', 'stocks.user_id', '=', 'users.id')
+        ->leftJoin('dealers', 'stocks.dealer_id', '=', 'dealers.id')
+        ->join('model', 'stocks.model_id', '=', 'model.id')
+        ->select(
+            'stocks.*', 
+            'model.title as model_title',
+            'model.model_img',
+            'users.name as buyer_name', 
+            'users.phone as buyer_phone', 
+            'users.email as buyer_email',
+            'dealers.shop_name'
+        )
+        ->whereNotNull('stocks.user_id')
+        ->where('stocks.user_id', '!=', 0)
+        ->orderBy('stocks.updated_at', 'desc')
+        ->get();
+
+    // Split collections for the tabs
+    $pendingOrders = $allOrders->where('status', 'pending');
+    $completedOrders = $allOrders->where('status', 'completed');
+
+    return view('admin.buy_orders', compact('pendingOrders', 'completedOrders'));
+}
+
+public function service_repairs()
+{
+    $allRequests = DB::table('service_repairs')
+        ->leftJoin('model', 'service_repairs.model_id', '=', 'model.id')
+        ->select('service_repairs.*', 'model.title as model_title')
+        ->orderBy('service_repairs.created_at', 'desc')
+        ->get();
+
+    $pendingServices = $allRequests->filter(fn($req) => strtolower(trim($req->status)) === 'pending');
+    $completedServices = $allRequests->filter(fn($req) => strtolower(trim($req->status)) === 'completed');
+
+    return view('admin.service_repairs', compact('pendingServices', 'completedServices'));
+}
 
 }

@@ -43,6 +43,13 @@ Route::get('/check-session', function() {
     ]);
 });
 
+Route::view('/contact-us', 'contact_us')->name('contact-us');
+Route::view('/about-us', 'about_us')->name('about-us');
+Route::view('/privacy-policy', 'privacy_policy')->name('privacy-policy');
+Route::view('/terms-and-conditions', 'terms_and_conditions')->name('terms-and-conditions');
+Route::view('/faq', 'faq')->name('faq');
+Route::view('/dealer-register', 'dealer-register')->name('dealer-register');
+
 
 Route::get('/profile', [UserController::class, 'profile'])->name('profile');
 Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
@@ -50,6 +57,10 @@ Route::get('/my-cart', [UserController::class, 'my_cart'])->name('my-cart');
 Route::get('/my-orders', [UserController::class, 'my_orders'])->name('my-orders');
 Route::post('/cancel-order', [UserController::class, 'cancel_order'])->name('cancel.order');
 Route::get('/buy-orders', [UserController::class, 'buy_orders'])->name('buy_orders');
+
+Route::get('/service-repair', [UserController::class, 'service_repair'])->name('service_repair');
+Route::post('/service-repair', [UserController::class, 'store_service_repair'])->name('store_service_repair');
+Route::get('/my-service-repair', [UserController::class, 'my_service_repair'])->name('my_service_repair');
 
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
@@ -96,6 +107,10 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     Route::post('/dealer-stock/approve/{id}', [AdminController::class, 'dealer_stock_approve'])->name('admin.dealerStock.approve');
     Route::delete('/dealer-stock/reject/{id}', [AdminController::class, 'dealer_stock_reject'])->name('admin.dealerStock.reject');
     
+        Route::get('/buy-orders', [AdminController::class, 'buy_orders'])->name('admin.buy_orders');
+        Route::get('/service-repairs', [AdminController::class, 'service_repairs'])->name('admin.service_repairs');
+
+
 });
 
 // http://127.0.0.1:8000/sell-old-phone/sell-oneplus

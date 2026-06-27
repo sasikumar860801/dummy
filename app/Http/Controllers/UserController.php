@@ -1745,4 +1745,78 @@ $user = DB::table('users')->where('id', $userId)->first();
     return view('users.buy_orders', compact('pendingOrders', 'completedOrders', 'user'));
 }
 
+public function service_repair()
+{
+    // Fetch all models for the Select2 dropdown
+    // Assuming your table is named 'models' or 'mobile_models'
+    $models = DB::table('model')->select('id', 'title')->get(); 
+    return view('users.service_repair', compact('models'));
+}
+
+public function store_service_repair(Request $request)
+{
+      if (!Session::has('user_id')) {
+        return redirect('/')->with('error', 'Please login to view your orders.');
+    }
+
+    $userId = Session::get('user_id');
+
+    $request->validate([
+        'model_id' => 'required|integer',
+        'category_name' => 'required|string',
+        'subcategory_name' => 'required|string',
+        'name' => 'required|string|max:150',
+        'phone' => 'required|string|max:20',
+        'address' => 'required|string',
+        'pincode' => 'required|string|max:10',
+    ]);
+
+    // Generate SER + 10 digit random number
+    $service_id = 'SER' . mt_rand(1000000000, 9999999999);
+
+    DB::table('service_repairs')->insert([
+        'service_id' => $service_id,
+        'user_id' => $userId,
+        'model_id' => $request->model_id,
+        'category_name' => $request->category_name,
+        'subcategory_name' => $request->subcategory_name,
+        'name' => $request->name,
+        'phone' => $request->phone,
+        'alt_phone' => $request->alt_phone,
+        'address' => $request->address,
+        'landmark' => $request->landmark,
+        'pincode' => $request->pincode,
+        'remarks' => $request->remarks,
+        'status' => 'pending',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->route('my_service_repair')->with('success', 'Repair request submitted successfully. Service ID: ' . $service_id);
+}
+
+public function my_service_repair()
+{
+    
+      if (!Session::has('user_id')) {
+        return redirect('/')->with('error', 'Please login to view your orders.');
+    }
+
+    $userId = Session::get('user_id');
+       
+    $user = DB::table('users')->where('id', $userId)->first();
+
+    $allRequests = DB::table('service_repairs')
+        ->leftJoin('model', 'service_repairs.model_id', '=', 'model.id')
+        ->select('service_repairs.*', 'model.title as model_title','model.model_img')
+        ->where('service_repairs.user_id', $userId)
+        ->orderBy('service_repairs.created_at', 'desc')
+        ->get();
+
+    $pendingServices = $allRequests->filter(fn($req) => strtolower(trim($req->status)) === 'pending');
+    $completedServices = $allRequests->filter(fn($req) => strtolower(trim($req->status)) === 'completed');
+
+    return view('users.my_service_repair', compact('pendingServices', 'completedServices','user'));
+}
+
 }

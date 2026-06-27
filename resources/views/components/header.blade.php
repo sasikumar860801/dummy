@@ -23,11 +23,11 @@
             </div>
 
             <div id="userSection" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 8px; background: #1a1a2e; padding: 8px 16px; border-radius: 30px; cursor: pointer;">
+                <!-- <div style="display: flex; align-items: center; gap: 8px; background: #1a1a2e; padding: 8px 16px; border-radius: 30px; cursor: pointer;">
                     <i class="fas fa-map-marker-alt" style="color: #3b82f6;"></i>
                     <span style="font-size: 14px;">New Delhi</span>
                     <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
-                </div>
+                </div> -->
                 
                 @if($isLoggedIn)
                     <div class="user-dropdown" style="position: relative; z-index: 10000;">
@@ -116,6 +116,8 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+
+    
 document.addEventListener('DOMContentLoaded', function() {
     // --- Auto-complete Search Script Engine ---
     const $searchInput = $('#deviceSearchInput');
@@ -377,5 +379,14 @@ else {
             error: function() { window.location.reload(); }
         });
     });
+});
+</script>
+
+<script>
+window.addEventListener('pageshow', function () {
+    const input = document.getElementById('deviceSearchInput');
+    if (input) {
+        input.value = '';
+    }
 });
 </script>

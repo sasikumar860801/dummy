@@ -105,20 +105,27 @@
                     <p style="color: #64748b; font-size: 12px; margin-top: 4px;">{{ $user->phone ?? 'N/A' }}</p>
                 </div>
 
-                <nav>
-                    <a href="{{ route('profile') }}" class="sidebar-link">
+                      <nav>
+                    <a href="{{ route('profile') }}" class="sidebar-link ">
                         <i class="fas fa-user" style="width: 20px;"></i> My Profile
                     </a>
-                    <a href="{{ route('my-cart') }}" class="sidebar-link">
-                        <i class="fas fa-shopping-cart" style="width: 20px;"></i> My Cart
+                    <a href="my-cart" class="sidebar-link" style="opacity: 0.5; cursor: not-allowed;">
+                        <i class="fas fa-shopping-cart" style="width: 20px;"></i>  Cart
                     </a>
-                    <a href="{{ route('my-orders') }}" class="sidebar-link">
-                        <i class="fas fa-box-open" style="width: 20px;"></i> Sell Orders
+                    <a href="my-orders" class="sidebar-link " style="opacity: 0.5; cursor: not-allowed;">
+                        <i class="fas fa-box-open" style="width: 20px;"></i> Sell Order
                     </a>
-                    <a href="{{ route('buy_orders') }}" class="sidebar-link active">
+
+                      <a href="{{ route('buy_orders') }}" class="sidebar-link active">
                         <i class="fas fa-shopping-bag" style="width: 20px;"></i> Buy Orders
                     </a>
-                    <hr style="border: none; border-top: 1px solid #1e1e2a; margin: 15px 0;">
+
+                      <a href="{{ route('my_service_repair') }}" class="sidebar-link ">
+                        <i class="fas fa-tools" style="width: 20px;"></i> Repair & Services
+                    </a>
+                    
+                    <hr style="border: none; border-top: 1px solid #1e1e2a; my: 15px; margin: 15px 0;">
+                    
                     <form id="logoutForm" method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="sidebar-link" style="color: #ef4444; border:none; background:none;">

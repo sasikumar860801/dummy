@@ -11,7 +11,7 @@
             </div>
 
             <h4 class="category-card-title">Mobiles</h4>
-            <p class="category-card-subtitle">iPhone • Samsung • Pixel</p>
+            <p class="category-card-subtitle">Sell Your Old iPhone • Samsung • Pixel</p>
             <span class="action-arrow-tag">Explore <i class="fas fa-chevron-right"></i></span>
         </div>
     </a>
@@ -27,12 +27,12 @@
             </div>
 
             <h4 class="category-card-title">Tablets</h4>
-            <p class="category-card-subtitle">iPad • Samsung Tab</p>
+            <p class="category-card-subtitle">Sell Your Old iPad • Samsung Tab</p>
             <span class="action-arrow-tag">Explore <i class="fas fa-chevron-right"></i></span>
         </div>
     </a>
 
-    <div class="premium-category-card laptop-accent coming-soon-disabled" 
+    <!-- <div class="premium-category-card laptop-accent coming-soon-disabled" 
          onclick="alert('Future update: Laptop & PC selling will be available soon!')">
         <div class="card-glow-layer"></div>
         
@@ -47,7 +47,23 @@
         <h4 class="category-card-title">Laptops</h4>
         <p class="category-card-subtitle">MacBook • Dell • HP</p>
         <span class="action-arrow-tag text-muted">Coming Soon</span>
-    </div>
+    </div> -->
+
+   <a href="{{ route('service_repair') }}" class="category-link">
+        <div class="premium-category-card tablet-accent">
+            <div class="card-glow-layer"></div>
+            
+            <div class="category-media-frame">
+                <div class="device-mockup laptop-mock">
+                <span class="laptop-base"></span>
+            </div>
+            </div>
+
+            <h4 class="category-card-title">Service & Repair</h4>
+            <p class="category-card-subtitle">Mobile Repair • Tablet Repair • Laptop Repair </p>
+            <span class="action-arrow-tag">Explore <i class="fas fa-chevron-right"></i></span>
+        </div>
+    </a>
 
 </div>
 

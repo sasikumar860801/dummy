@@ -35,7 +35,7 @@
             <i class="fas fa-chart-pie" style="width: 20px;"></i> Dashboard
         </a>
         <a href="{{ route('admin.orders') }}" class="nav-item-link {{ Route::is('admin.orders') ? 'active' : '' }}">
-            <i class="fas fa-shopping-bag" style="width: 20px;"></i> Orders
+            <i class="fas fa-shopping-bag" style="width: 20px;"></i> Sell Orders
         </a>
         <a href="{{ route('admin.stock') }}" class="nav-item-link {{ Route::is('admin.stock') ? 'active' : '' }}">
             <i class="fas fa-boxes" style="width: 20px;"></i> Stock
@@ -43,15 +43,20 @@
         <a href="{{ route('admin.models') }}" class="nav-item-link {{ Route::is('admin.models') ? 'active' : '' }}">
             <i class="fas fa-mobile" style="width: 20px;"></i> Models
         </a>
-         <a href="{{ route('admin.dealers.index') }}" class="nav-item-link {{ Route::is('admin.dealers') ? 'active' : '' }}">
+         <a href="{{ route('admin.dealers.index') }}" class="nav-item-link {{ Route::is('admin.dealers.index') ? 'active' : '' }}">
             <i class="fas fa-boxes" style="width: 20px;"></i> Dealers
         </a>
-         <a href="{{ route('admin.bidding.index') }}" class="nav-item-link {{ Route::is('admin.bidding') ? 'active' : '' }}">
+         <a href="{{ route('admin.bidding.index') }}" class="nav-item-link {{ Route::is('admin.bidding.index') ? 'active' : '' }}">
             <i class="fas fa-boxes" style="width: 20px;"></i> Bidding
         </a>
-         <a href="{{ route('admin.dealerStock.index') }}" class="nav-item-link {{ Route::is('admin.dealerStock') ? 'active' : '' }}">
+         <a href="{{ route('admin.dealerStock.index') }}" class="nav-item-link {{ Route::is('admin.dealerStock.index') ? 'active' : '' }}">
             <i class="fas fa-boxes" style="width: 20px;"></i> Dealer stock
         </a>
+
+          <a href="{{ route('admin.buy_orders') }}" class="nav-item-link {{ Route::is('admin.buy_orders') ? 'active' : '' }}">
+            <i class="fas fa-boxes" style="width: 20px;"></i> Buy orders
+        </a>
+
     </nav>
 
     <div style="border-top: 1px solid #1e1e2a; padding-top: 15px;">

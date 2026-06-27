@@ -37,16 +37,7 @@
         </p>
     </div>
 
-    <!-- Search Box -->
-    <div style="max-width: 500px; margin: 0 auto 40px;">
-        <div style="position: relative;">
-            <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
-            <input type="text" 
-                   id="searchModel" 
-                   placeholder="Search your {{ $brand->title }} model (e.g., Galaxy S23, Note 20)" 
-                   style="width: 100%; padding: 14px 20px 14px 45px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 30px; color: white; outline: none; font-size: 14px;">
-        </div>
-    </div>
+
 
     <!-- Choose by Series -->
     <div style="margin-bottom: 50px;">
@@ -58,6 +49,17 @@
                 {{ $series->title }}
             </button>
             @endforeach
+        </div>
+    </div>
+
+        <!-- Search Box -->
+    <div style="max-width: 500px; margin: 0 auto 40px;">
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+            <input type="text" 
+                   id="searchModel" 
+                   placeholder="Search your {{ $brand->title }} model (e.g., Galaxy S23, Note 20)" 
+                   style="width: 100%; padding: 14px 20px 14px 45px; background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 30px; color: white; outline: none; font-size: 14px;">
         </div>
     </div>
 

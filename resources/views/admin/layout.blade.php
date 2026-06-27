@@ -35,7 +35,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div style="font-weight: 600; font-size: 15px; color: #94a3b8;">
-                Role: <span style="color: #ec4899;">System Operator</span>
+                Role: <span style="color: #ec4899;">System Operators</span>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 32px; height: 32px; background: #1a1a2e; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #ec4899;">
