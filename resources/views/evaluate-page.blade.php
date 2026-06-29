@@ -118,7 +118,7 @@
         <!-- Right Column - Summary Sidebar -->
         <div class="summary-sidebar" id="summarySidebar">
             <div class="summary-header">
-                <h3>Device Evaluation</h3>
+                <h3>Device Inspection</h3>
                 <button class="close-summary" id="closeSummaryBtn" style="display: none;">&times;</button>
             </div>
             
@@ -143,7 +143,7 @@
 <div id="mobileSummaryModal" class="mobile-modal" style="display: none;">
     <div class="mobile-modal-content">
         <div class="mobile-modal-header">
-            <h3>Device Evaluation Summary</h3>
+            <h3>Device Inspection Summary</h3>
             <button class="close-modal">&times;</button>
         </div>
         <div class="mobile-modal-body">
@@ -1276,7 +1276,7 @@ function handleNoAnswerNext() {
                                 // alert('Evaluation completed successfully!');
                                 
                                 // Redirect to cart page
-                                window.location.href = '/cart';
+                                window.location.href = '/my-cart';
                             } else {
                                 alert('Error saving to cart: ' + (cartResponse.message || 'Please try again'));
                                 $finalBtn.prop('disabled', false);

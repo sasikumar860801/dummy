@@ -846,4 +846,39 @@ public function service_repairs()
     return view('admin.service_repairs', compact('pendingServices', 'completedServices'));
 }
 
+public function user_list()
+{
+    // Fetch users who have partial orders but haven't completed them
+    $abandonedOrders = DB::table('partial_order_items')
+        ->join('users', 'partial_order_items.user_id', '=', 'users.id')
+        ->leftJoin('model', 'partial_order_items.model_id', '=', 'model.id')
+        
+        // Collation Fix 1: Force utf8mb4_unicode_ci on the order_id subquery
+        ->whereNotIn('partial_order_items.order_id', function ($query) {
+            $query->select(DB::raw('order_id COLLATE utf8mb4_unicode_ci'))
+                  ->from('order_items')
+                  ->whereNotNull('order_id');
+        })
+        ->select(
+            'users.name',
+            'users.email',
+            'users.phone',
+            'users.alternate_mob_no',
+            'users.address',
+            'users.pincode',
+            
+            // Collation Fix 2: Force utf8mb4_unicode_ci on both sides of the pincode check
+            DB::raw('(SELECT district FROM post_offices WHERE post_offices.pincode COLLATE utf8mb4_unicode_ci = users.pincode COLLATE utf8mb4_unicode_ci LIMIT 1) as district_name'),
+            
+            'model.title as model_name',
+            'partial_order_items.capacity',
+            'partial_order_items.id as partial_id',
+            'partial_order_items.created_at'
+        )
+        ->orderBy('partial_order_items.id', 'desc')
+        ->get();
+
+    return view('admin.user_list', compact('abandonedOrders'));
+}
+
 }

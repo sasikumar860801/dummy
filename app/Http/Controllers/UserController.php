@@ -965,28 +965,16 @@ public function particular_model($slug)
  */
 private function normalizeCapacity($capacity)
 {
-    // Remove spaces and convert to uppercase
-    $normalized = strtoupper(preg_replace('/\s+/', '', $capacity));
-    
-    // Check if it already has the format "XGB/XGB"
-    if (strpos($normalized, '/') !== false) {
-        return $normalized;
+    $value = strtolower($capacity);
+
+    // remove everything except letters and numbers
+    $value = preg_replace('/[^a-z0-9]/', '', $value);
+
+    if (preg_match('/(\d+gb)(\d+gb)/', $value, $m)) {
+        return strtoupper($m[1] . '/' . $m[2]);
     }
-    
-    // Convert "8GB128GB" to "8GB/128GB"
-    if (preg_match('/(\d+GB)(\d+GB)/i', $normalized, $matches)) {
-        return $matches[1] . '/' . $matches[2];
-    }
-    
-    // Convert "8gb128gb" to "8GB/128GB"
-    if (preg_match('/(\d+)GB(\d+)GB/i', $normalized, $matches)) {
-        return $matches[1] . 'GB/' . $matches[2] . 'GB';
-    }
-    
-    // Convert "8gb 128gb" with space to "8GB/128GB"
-    $normalized = str_replace(' ', '/', $normalized);
-    
-    return $normalized;
+
+    return strtoupper($value);
 }
     /**
      * Calculate price logic
@@ -1433,16 +1421,24 @@ public function view_summary($order_id)
     $defects = [];
     $optionIds = [];
 
+    // First decode main row
     $itemData = json_decode($row->item_name, true);
 
-    if (
-        isset($itemData['item_name']) &&
-        !empty($itemData['item_name'])
-    ) {
+    if (!empty($itemData['item_name'])) {
 
+        // Decode inner JSON (double encoded)
         $summaryData = json_decode($itemData['item_name'], true);
 
-        // Questions
+        if (!$summaryData) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid summary data format'
+            ]);
+        }
+
+        /* -----------------------------
+         |  QUESTIONS
+         ------------------------------*/
         if (!empty($summaryData['qa_details'])) {
 
             foreach ($summaryData['qa_details'] as $qa) {
@@ -1453,33 +1449,30 @@ public function view_summary($order_id)
             }
         }
 
-        // Collect option ids from yes_question_details
+        /* -----------------------------
+         |  EXTRACT OPTION IDS (FIXED)
+         ------------------------------*/
         if (!empty($summaryData['yes_question_details'])) {
 
-            foreach ($summaryData['yes_question_details'] as $item) {
+            foreach ($summaryData['yes_question_details'] as $questionItem) {
 
-                if (!isset($item['option_id'])) {
-                    continue;
-                }
+                $selectedOptions = $questionItem['selected_options'] ?? [];
 
-                if (is_array($item['option_id'])) {
+                foreach ($selectedOptions as $option) {
 
-                    $optionIds = array_merge(
-                        $optionIds,
-                        $item['option_id']
-                    );
-
-                } else {
-
-                    $optionIds[] = $item['option_id'];
+                    if (!empty($option['option_id'])) {
+                        $optionIds[] = $option['option_id'];
+                    }
                 }
             }
         }
 
-        // Remove duplicate ids
+        // Remove duplicates
         $optionIds = array_unique($optionIds);
 
-        // Get actual option labels from product_options table
+        /* -----------------------------
+         |  GET DEFECT LABELS
+         ------------------------------*/
         if (!empty($optionIds)) {
 
             $defects = DB::table('product_options')
@@ -1493,7 +1486,8 @@ public function view_summary($order_id)
         'status' => true,
         'order_id' => $order_id,
         'question' => $question,
-        'defects' => $defects
+        'defects' => $defects,
+        'option_ids' => array_values($optionIds) // optional for debugging
     ]);
 }
 

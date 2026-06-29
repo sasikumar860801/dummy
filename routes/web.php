@@ -109,6 +109,7 @@ Route::middleware([\App\Http\Middleware\AdminAuth::class])->prefix('admin')->gro
     
         Route::get('/buy-orders', [AdminController::class, 'buy_orders'])->name('admin.buy_orders');
         Route::get('/service-repairs', [AdminController::class, 'service_repairs'])->name('admin.service_repairs');
+    Route::get('/user-list', [AdminController::class, 'user_list'])->name('admin.user_list');
 
 
 });

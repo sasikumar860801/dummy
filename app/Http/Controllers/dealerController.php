@@ -122,6 +122,52 @@ class dealerController extends Controller
         ]);
     }
 
+    public function verifyMpin(Request $request)
+{
+    $dealerId = $request->dealer_id;
+    $mpin     = trim($request->mpin);
+
+    if (!$dealerId || !$mpin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Dealer ID and MPIN are required'
+        ], 400);
+    }
+
+    $dealer = DB::table('dealers')
+        ->where('id', $dealerId)
+        ->first();
+
+    if (!$dealer) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Dealer not found'
+        ], 404);
+    }
+
+    if ($dealer->mpin !== $mpin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid MPIN'
+        ], 401);
+    }
+
+    // Generate secure random 64-character token
+    $authToken = Str::random(64);
+
+    DB::table('dealers')
+        ->where('id', $dealerId)
+        ->update([
+            'auth_token' => $authToken,
+        ]);
+
+    return response()->json([
+        'success'    => true,
+        'message'    => 'MPIN verified successfully',
+        'auth_token' => $authToken,
+    ]);
+}
+
     public function updateFirebase(Request $request)
     {
         $fcmToken = trim($request->fcm_token);
@@ -1076,4 +1122,402 @@ public function createDealerStock(Request $request)
             ], 500);
         }
     }
+
+     public function dashboard(Request $request)
+    {
+        try {
+            // Get dealer_id from request
+            $dealerId = $request->input('dealer_id');
+
+            
+            if (!$dealerId) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Dealer ID is required'
+                ], 400);
+            }
+            
+            // Get dealer details
+            $dealer = DB::table('dealers')->where('id', $dealerId)->first();
+            
+            if (!$dealer) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Dealer not found'
+                ], 404);
+            }
+            
+            // Decode district IDs (assuming it's stored as JSON array)
+            $dealerDistricts = json_decode($dealer->district, true);
+            
+            if (!is_array($dealerDistricts)) {
+                $dealerDistricts = [];
+            }
+            
+            // ==========================================
+            // 1. Account Balance
+            // ==========================================
+            $accountBalance = DB::table('dealer_accounts')
+                ->where('dealer_id', $dealerId)
+                ->orderBy('id', 'desc')
+                ->value('current_balance') ?? 0;
+            
+            // ==========================================
+            // 2. New Leads Count
+            // Orders with pending status, no dealer assigned,
+            // bidding_status = pending, and district matches dealer's districts
+            // ==========================================
+            $newLeadsCount = DB::table('orders')
+                ->where('status', 'pending')
+                ->whereNull('dealer_id')
+                ->where('bidding_status', 'pending')
+                ->whereIn('district_id', $dealerDistricts)
+                ->count();
+            
+            // ==========================================
+            // 3. Live Leads Count
+            // Orders assigned to this dealer, status = pending, 
+            // bidding_status = completed
+            // ==========================================
+            $liveLeadsCount = DB::table('orders')
+                ->where('dealer_id', $dealerId)
+                ->where('status', 'pending')
+                ->where('bidding_status', 'completed')
+                ->count();
+            
+            // ==========================================
+            // 4. Completed Leads Count
+            // Orders assigned to this dealer with status = completed
+            // ==========================================
+            $completedLeadsCount = DB::table('orders')
+                ->where('dealer_id', $dealerId)
+                ->where('status', 'completed')
+                ->count();
+            
+            // ==========================================
+            // 5. Cancelled Leads Count
+            // Orders assigned to this dealer with status = cancelled
+            // ==========================================
+            $cancelledLeadsCount = DB::table('orders')
+                ->where('dealer_id', $dealerId)
+                ->where('status', 'cancelled')
+                ->count();
+            
+            // ==========================================
+            // 6. My Stocks Count
+            // Stocks with dealer_id and status = pending
+            // ==========================================
+            $myStocksCount = DB::table('stocks')
+                ->where('dealer_id', $dealerId)
+                ->where('status', 'pending')
+                ->count();
+            
+            // ==========================================
+            // 7. My Orders Count (Pending)
+            // Stocks with dealer_id, user_id != 0, status = pending
+            // ==========================================
+            $myOrdersCount = DB::table('stocks')
+                ->where('dealer_id', $dealerId)
+                ->where('user_id', '!=', 0)
+                ->where('status', 'pending')
+                ->count();
+            
+            // ==========================================
+            // 8. Completed My Orders Count
+            // Stocks with dealer_id, user_id != 0, status = completed
+            // ==========================================
+            $completedMyOrdersCount = DB::table('stocks')
+                ->where('dealer_id', $dealerId)
+                ->where('user_id', '!=', 0)
+                ->where('status', 'completed')
+                ->count();
+            
+            // ==========================================
+            // 9. New Service Repair Leads Count
+            // Service repairs with status = pending and 
+            // district matches dealer's districts
+            // ==========================================
+            $newServiceRepairCount = DB::table('service_repairs')
+                ->where('status', 'pending')
+                ->whereIn('district_id', $dealerDistricts)
+                ->count();
+            
+            // ==========================================
+            // 10. Completed Service Count
+            // Service repairs with status = completed and dealer_id = $dealerId
+            // ==========================================
+            $completedServiceCount = DB::table('service_repairs')
+                ->where('status', 'completed')
+                ->where('dealer_id', $dealerId)
+                ->count();
+            
+            // ==========================================
+            // 11. Cancelled Service Count
+            // Service repairs with status = cancelled and dealer_id = $dealerId
+            // ==========================================
+            $cancelledServiceCount = DB::table('service_repairs')
+                ->where('status', 'cancelled')
+                ->where('dealer_id', $dealerId)
+                ->count();
+            
+            // Return response
+            return response()->json([
+                'status' => true,
+                'message' => 'Dashboard data fetched successfully',
+                'data' => [
+                    'account_balance' => (float) $accountBalance,
+                    'new_leads_count' => $newLeadsCount,
+                    'live_leads_count' => $liveLeadsCount,
+                    'completed_leads_count' => $completedLeadsCount,
+                    'cancelled_leads_count' => $cancelledLeadsCount,
+                    'my_stocks_count' => $myStocksCount,
+                    'my_orders_count' => $myOrdersCount,
+                    'completed_my_orders_count' => $completedMyOrdersCount,
+                    'new_service_repair_count' => $newServiceRepairCount,
+                    'completed_service_count' => $completedServiceCount,
+                    'cancelled_service_count' => $cancelledServiceCount,
+                    'dealer_districts' => $dealerDistricts
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cancel_lead_request(Request $request)
+{
+    try {
+        // Get dealer_id and order_id from request
+        $dealerId = $request->input('dealer_id');
+        $orderId = $request->input('order_id');
+        
+        // Validate required fields
+        if (!$dealerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dealer ID is required'
+            ], 400);
+        }
+        
+        if (!$orderId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order ID is required'
+            ], 400);
+        }
+        
+        // Check if order exists with dealer_id and status = pending
+        $order = DB::table('orders')
+            ->where('id', $orderId)
+            ->where('dealer_id', $dealerId)
+            ->where('status', 'pending')
+            ->first();
+        
+        // If order not found, return false
+        if (!$order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found or already processed'
+            ], 404);
+        }
+        
+        // Update order status to 'reject'
+        $updated = DB::table('orders')
+            ->where('id', $orderId)
+            ->update([
+                'status' => 'reject',
+                'updated_at' => now()
+            ]);
+        
+        if ($updated) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Lead request cancelled successfully',
+                'data' => [
+                    'order_id' => $orderId,
+                    'dealer_id' => $dealerId,
+                    'status' => 'reject'
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to cancel lead request'
+            ], 500);
+        }
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function account_balance_history(Request $request)
+{
+    try {
+        // Get dealer_id from request
+        $dealerId = $request->input('dealer_id');
+        
+        if (!$dealerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dealer ID is required'
+            ], 400);
+        }
+        
+        // Get all dealer_accounts records for this dealer (ordered by id desc)
+        $accountHistory = DB::table('dealer_accounts')
+            ->where('dealer_id', $dealerId)
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        // Get current balance (latest record's current_balance)
+        $currentBalance = DB::table('dealer_accounts')
+            ->where('dealer_id', $dealerId)
+            ->orderBy('id', 'desc')
+            ->value('current_balance') ?? 0;
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Account balance history fetched successfully',
+            'data' => [
+                'current_balance' => (float) $currentBalance,
+                'history' => $accountHistory
+            ]
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function buy_orders(Request $request)
+{
+    try {
+        // Get dealer_id from request
+        $dealerId = $request->input('dealer_id');
+        
+        if (!$dealerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dealer ID is required'
+            ], 400);
+        }
+        
+        // Get stocks with dealer_id and user_id != 0
+        $stocks = DB::table('stocks')
+            ->join('model', 'stocks.model_id', '=', 'model.id')
+            ->leftJoin('brand', 'model.brand_id', '=', 'brand.id')
+            ->where('stocks.dealer_id', $dealerId)
+            ->where('stocks.user_id', '!=', 0)
+            ->select(
+                'stocks.id',
+                'stocks.order_id',
+                'stocks.model_id',
+                'brand.title as brand_title',
+                'model.title as model_title',
+                'stocks.capacity',
+                'stocks.color',
+                'stocks.buy_price',
+                'stocks.sell_price',
+                'stocks.imei_no_1',
+                'stocks.imei_no_2',
+                'stocks.warranty',
+                'stocks.status',
+                'stocks.is_approved',
+                'stocks.media',
+                'stocks.customer_details',
+                'stocks.created_at'
+            )
+            ->orderBy('stocks.id', 'desc')
+            ->get();
+        
+        // Decode customer_details for each stock
+        $stocksWithDecodedCustomer = $stocks->map(function($stock) {
+            $stock->customer_details = json_decode($stock->customer_details, true);
+            return $stock;
+        });
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Buy orders fetched successfully',
+            'data' => $stocksWithDecodedCustomer
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function service_repairs(Request $request)
+{
+    try {
+        // Get dealer_id from request
+        $dealerId = $request->input('dealer_id');
+        
+        if (!$dealerId) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dealer ID is required'
+            ], 400);
+        }
+        
+        // Get dealer details
+        $dealer = DB::table('dealers')->where('id', $dealerId)->first();
+        
+        if (!$dealer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dealer not found'
+            ], 404);
+        }
+        
+        // Decode district IDs (assuming it's stored as JSON array)
+        $dealerDistricts = json_decode($dealer->district, true);
+        
+        if (!is_array($dealerDistricts)) {
+            $dealerDistricts = [];
+        }
+        
+        // If dealer has no districts assigned, return empty data
+        if (empty($dealerDistricts)) {
+            return response()->json([
+                'status' => true,
+                'message' => 'No districts assigned to this dealer',
+                'data' => []
+            ]);
+        }
+        
+        // Get service repairs where district_id matches dealer's districts
+        $serviceRepairs = DB::table('service_repairs')
+            ->whereIn('district_id', $dealerDistricts)
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Service repairs fetched successfully',
+            'data' => $serviceRepairs
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 }

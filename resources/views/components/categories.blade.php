@@ -27,7 +27,7 @@
             </div>
 
             <h4 class="category-card-title">Tablets</h4>
-            <p class="category-card-subtitle">Sell Your Old iPad • Samsung Tab</p>
+            <p class="category-card-subtitle">Sell Your Old iPad • Samsung Tab • Apple iPad </p>
             <span class="action-arrow-tag">Explore <i class="fas fa-chevron-right"></i></span>
         </div>
     </a>
